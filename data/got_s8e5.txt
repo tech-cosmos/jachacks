@@ -1,4 +1,5 @@
 # TITLE: Game of Thrones — S8E5 "The Bells"
+# CANON: game-of-thrones
 # KIND: tv episode script
 # VOCAB: dothraki_horde, unsullied, jon_snow, daenerys, drogon, kings_landing, golden_company
 

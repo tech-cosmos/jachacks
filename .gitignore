@@ -8,3 +8,7 @@ __pycache__/
 .playwright-mcp/
 viz-check.png
 ui-*.png
+data/monsters_inc.txt
+data/monsters_university.txt
+data/final_destination_3.txt
+data/lady_vanishes.txt

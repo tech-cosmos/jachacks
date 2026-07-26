@@ -1,4 +1,5 @@
 # TITLE: Home Alone (1990) — Part 1
+# CANON: home-alone
 # KIND: film script
 # VOCAB: kevin, kate, mccallister_family, mccallister_phone, mccallister_house, alarm_clocks, house_power, wet_bandits, murphy_house
 

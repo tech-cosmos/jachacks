@@ -1,4 +1,5 @@
 # TITLE: Game of Thrones — S8E3 "The Long Night"
+# CANON: game-of-thrones
 # KIND: tv episode script
 # VOCAB: dothraki_horde, unsullied, jon_snow, daenerys, arya, night_king, winterfell, army_of_the_dead
 

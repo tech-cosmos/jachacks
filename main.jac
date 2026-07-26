@@ -16,6 +16,9 @@ import sys;
 import os;
 import time;
 import json;
+import re;
+import html;
+import zipfile;
 import litellm;
 import from byllm.llm { Model }
 import from http.server { HTTPServer, BaseHTTPRequestHandler }
@@ -26,12 +29,14 @@ def pick_model() -> str {
         return m;
     }
     if os.environ.get("OPENROUTER_API_KEY", "") != "" {
-        return "openrouter/anthropic/claude-sonnet-5";
+        return "openrouter/deepseek/deepseek-v4-flash";
     }
     return "gemini/gemini-2.5-flash";
 }
 
 glob llm = Model(model_name=pick_model());
+glob judge_llm = Model(
+    model_name=os.environ.get("CW_JUDGE_MODEL", pick_model()));
 
 # ---------------------------------------------------------------- typed facts
 
@@ -114,10 +119,10 @@ Rules of adjudication:
   scene — someone must be shown fixing, breaking, or revoking them.
 confidence is one of high / medium / low."""
 def adjudicate(requirement: str, canon_timeline: str,
-               scene_excerpt: str) -> Verdict by llm();
+               scene_excerpt: str) -> Verdict by judge_llm();
 
 """List the plot holes in this script. Be specific and number them."""
-def find_plot_holes(script: str) -> list[str] by llm();
+def find_plot_holes(script: str) -> list[str] by judge_llm();
 
 # --------------------------------------------------------------------- graph
 
@@ -125,6 +130,7 @@ node Document {
     has title: str;
     has kind: str;
     has doc_index: int;
+    has canon: str = "";
 }
 
 node Segment {
@@ -214,6 +220,18 @@ def related(a: str, b: str) -> bool {
         return True;
     }
     return na.startswith(nb) or nb.startswith(na);
+}
+
+def canon_of(doc_index: int) -> str {
+    for d in all_documents() {
+        if d.doc_index == doc_index {
+            if d.canon != "" {
+                return d.canon;
+            }
+            return norm(d.title);
+        }
+    }
+    return "";
 }
 
 def timeline_for(subject: str, states: list) -> str {
@@ -320,19 +338,34 @@ obj ScriptData {
     has kind: str;
     has scenes: list;
     has vocab: list;
+    has canon: str;
+}
+
+def read_doc(path: str) -> str {
+    if path.lower().endswith(".docx") {
+        z = zipfile.ZipFile(path);
+        xml = z.read("word/document.xml").decode("utf-8");
+        z.close();
+        t = re.sub("<w:p [^>]*>|<w:p>", "\n", xml);
+        t = re.sub("<[^>]+>", "", t);
+        t = html.unescape(t);
+        return re.sub("\n{2,}", "\n", t).strip();
+    }
+    f = open(path, "r");
+    t = f.read();
+    f.close();
+    return t;
 }
 
 def parse_script(path: str) -> ScriptData {
-    f = open(path, "r");
-    text = f.read();
-    f.close();
-    return parse_script_text(text, path);
+    return parse_script_text(read_doc(path), path);
 }
 
 def parse_script_text(text: str, fallback_title: str) -> ScriptData {
     title = fallback_title;
     kind = "script";
     vocab = [];
+    canon = "";
     for raw in text.split("\n") {
         line = raw.strip();
         if line.startswith("# TITLE:") {
@@ -341,9 +374,13 @@ def parse_script_text(text: str, fallback_title: str) -> ScriptData {
             kind = line[7:].strip();
         } elif line.startswith("# VOCAB:") {
             vocab = [norm(v) for v in line[8:].split(",") if v.strip() != ""];
+        } elif line.startswith("# CANON:") {
+            canon = norm(line[8:]);
         }
     }
 
+    # normalize "Scene 12: Title" style headings into ## SCENE markers
+    text = re.sub("(?mi)^\\s*scene\\s+(\\d+)\\s*[:.].*$", "## SCENE \\1", text);
     scenes = [];
     chunks = text.split("## SCENE");
     counter = 0.0;
@@ -371,7 +408,7 @@ def parse_script_text(text: str, fallback_title: str) -> ScriptData {
                     }
                 }
             } elif line.startswith("# TITLE:") or line.startswith("# KIND:")
-                or line.startswith("# VOCAB:") {
+                or line.startswith("# VOCAB:") or line.startswith("# CANON:") {
                 continue;
             } else {
                 prose_lines.append(raw);
@@ -380,7 +417,33 @@ def parse_script_text(text: str, fallback_title: str) -> ScriptData {
         scenes.append(SceneData(order=order, prose="\n".join(prose_lines).strip(),
                                 exp_est=est, exp_req=req));
     }
-    return ScriptData(title=title, kind=kind, scenes=scenes, vocab=vocab);
+    if len(scenes) == 0 and text.strip() != "" {
+        # unstructured transcript: auto-chunk into ~2400-char segments
+        seg_lines = [];
+        size = 0;
+        order = 0.0;
+        for ln in text.split("\n") {
+            seg_lines.append(ln);
+            size += len(ln) + 1;
+            if size >= 2400 {
+                order += 1.0;
+                scenes.append(SceneData(order=order,
+                    prose="\n".join(seg_lines).strip(), exp_est=[], exp_req=[]));
+                seg_lines = [];
+                size = 0;
+            }
+        }
+        if "\n".join(seg_lines).strip() != "" {
+            order += 1.0;
+            scenes.append(SceneData(order=order,
+                prose="\n".join(seg_lines).strip(), exp_est=[], exp_req=[]));
+        }
+    }
+    if canon == "" {
+        canon = norm(title);
+    }
+    return ScriptData(title=title, kind=kind, scenes=scenes, vocab=vocab,
+                      canon=canon);
 }
 
 # ------------------------------------------------------------------- walkers
@@ -406,7 +469,7 @@ walker Ingest {
         }
         if doc is None {
             doc = Document(title=script.title, kind=script.kind,
-                           doc_index=len(docs));
+                           doc_index=len(docs), canon=script.canon);
             here ++> doc;
             note(self, f"+ document [{doc.doc_index}] {doc.title}");
         } else {
@@ -415,7 +478,8 @@ walker Ingest {
 
         no_llm = os.environ.get("CW_NO_LLM", "") == "1";
         existing_orders = [s.order for s in [doc -->[?:Segment]]];
-        states = all_established();
+        states = [st for st in all_established()
+                  if canon_of(st.doc_index) == script.canon];
         known_subj = sorted(set([st.subject for st in states] + script.vocab));
         known_pred = sorted(set([st.predicate for st in states]
                                 + ["status", "location", "possession", "alive",
@@ -431,8 +495,8 @@ walker Ingest {
                 note(self, f"  scene {fmt_scene(sc.order)}: structured mode "
                       f"({len(sc.exp_est)} est, {len(sc.exp_req)} req)");
             } else {
-                facts = safe_extract(sc.prose, sorted(set(known_subj)),
-                                     sorted(set(known_pred)));
+                facts = safe_extract(sc.prose, sorted(set(known_subj))[:80],
+                                     sorted(set(known_pred))[:30]);
                 if len(facts.establishes) == 0 and len(facts.requires) == 0
                     and len(sc.exp_est) + len(sc.exp_req) > 0 {
                     facts = SceneFacts(establishes=sc.exp_est, requires=sc.exp_req);
@@ -519,9 +583,12 @@ walker Auditor {
         n_nocanon = 0;
 
         for seg in segs {
+            seg_canon = canon_of(seg.doc_index);
+            scoped = [st for st in states
+                      if canon_of(st.doc_index) == seg_canon];
             for req in [seg ->:Requires:->] {
                 hist = [];
-                for st in states {
+                for st in scoped {
                     if st.subject == req.subject and st.predicate == req.predicate
                         and skey(st.doc_index, st.seg_order) < skey(seg.doc_index, seg.order) {
                         hist.append(st);
@@ -539,7 +606,7 @@ walker Auditor {
 
                 key = f"{req.subject}|{req.predicate}|{seg.doc_index}|{seg.order}";
                 seen.append(key);
-                tl = timeline_for(req.subject, states);
+                tl = timeline_for(req.subject, scoped);
                 requirement = (f"Scene {fmt_scene(seg.order)} of "
                                f"'{doc_title(seg.doc_index)}' requires: "
                                f"{req.subject} {req.predicate} = {req.value}");
@@ -934,6 +1001,22 @@ with entry {
         root spawn ShowCanon();
     } elif cmd == "score" {
         root spawn Score();
+    } elif cmd == "convert" {
+        # convert <src(.docx|.txt)> <out.txt> [title]  — for UI sample reels
+        src = argv[2];
+        out = argv[3];
+        title = os.path.basename(src);
+        if len(argv) > 4 {
+            title = argv[4];
+        }
+        script = parse_script_text(read_doc(src), title);
+        f = open(out, "w");
+        f.write(f"# TITLE: {title}\n# KIND: film transcript\n");
+        for sc in script.scenes {
+            f.write(f"\n## SCENE {fmt_scene(sc.order)}\n{sc.prose}\n");
+        }
+        f.close();
+        print(f"wrote {out}: {len(script.scenes)} scenes");
     } elif cmd == "serve" {
         port = 8765;
         if len(argv) > 2 {
