@@ -15,6 +15,7 @@ Usage:
 import sys;
 import os;
 import time;
+import json;
 import litellm;
 import from byllm.llm { Model }
 
@@ -113,6 +114,9 @@ Rules of adjudication:
 confidence is one of high / medium / low."""
 def adjudicate(requirement: str, canon_timeline: str,
                scene_excerpt: str) -> Verdict by llm();
+
+"""List the plot holes in this script. Be specific and number them."""
+def find_plot_holes(script: str) -> list[str] by llm();
 
 # --------------------------------------------------------------------- graph
 
@@ -523,7 +527,15 @@ walker Auditor {
                                f"'{doc_title(seg.doc_index)}' requires: "
                                f"{req.subject} {req.predicate} = {req.value}");
 
-                if no_llm {
+                if req.predicate == "location" {
+                    status = "declined";
+                    confidence = "rule";
+                    reasoning = ("Location mismatch declined by rule: agents "
+                                 "relocate freely between scenes, so movement is "
+                                 "always a legal implicit transition. Only "
+                                 "device/system/life states need an establishing "
+                                 "scene to change.");
+                } elif no_llm {
                     status = "candidate";
                     confidence = "";
                     reasoning = "exact-match mismatch (LLM adjudication off)";
@@ -644,6 +656,81 @@ walker Score {
     }
 }
 
+walker Dump {
+    has out: str = "web/graph.json";
+
+    can go with Root entry {
+        nodes = [];
+        edges = [];
+        sid = {};
+        i = 0;
+        for d in all_documents() {
+            nodes.append({"data": {"id": f"d{d.doc_index}", "label": d.title,
+                                   "type": "document"}});
+        }
+        for seg in all_segments() {
+            segid = f"d{seg.doc_index}s{seg.order}";
+            nodes.append({"data": {"id": segid,
+                                   "label": f"scene {fmt_scene(seg.order)}",
+                                   "type": "segment"}});
+            edges.append({"data": {"source": f"d{seg.doc_index}",
+                                   "target": segid, "kind": "contains"}});
+            for st in [seg ->:Establishes:->] {
+                i += 1;
+                stid = f"st{i}";
+                sid[id(st)] = stid;
+                nodes.append({"data": {"id": stid,
+                    "label": f"{st.subject}.{st.predicate} = {st.value}",
+                    "type": "state"}});
+                edges.append({"data": {"source": segid, "target": stid,
+                                       "kind": "establishes"}});
+            }
+            for st in [seg ->:Requires:->] {
+                i += 1;
+                stid = f"rq{i}";
+                nodes.append({"data": {"id": stid,
+                    "label": f"{st.subject}.{st.predicate} = {st.value}",
+                    "type": "requires"}});
+                edges.append({"data": {"source": segid, "target": stid,
+                                       "kind": "requires"}});
+            }
+        }
+        for seg in all_segments() {
+            for st in [seg ->:Establishes:->] {
+                for nxt in [st ->:Transition:->] {
+                    if id(st) in sid and id(nxt) in sid {
+                        edges.append({"data": {"source": sid[id(st)],
+                                               "target": sid[id(nxt)],
+                                               "kind": "transition"}});
+                    }
+                }
+            }
+        }
+        viols = [];
+        for v in [here -->[?:Violation]] {
+            i += 1;
+            vid = f"v{i}";
+            nodes.append({"data": {"id": vid,
+                "label": f"{v.subject}.{v.predicate}: {v.required_value} vs {v.found_value}",
+                "type": "violation", "status": v.status}});
+            edges.append({"data": {"source": f"d{v.req_doc}s{v.req_seg}",
+                                   "target": vid, "kind": "flags"}});
+            viols.append({"subject": v.subject, "predicate": v.predicate,
+                          "required": v.required_value, "found": v.found_value,
+                          "at": f"{doc_title(v.req_doc)} — scene {fmt_scene(v.req_seg)}",
+                          "status": v.status, "confidence": v.confidence,
+                          "timeline": v.timeline, "reasoning": v.reasoning});
+        }
+        data = {"elements": {"nodes": nodes, "edges": edges},
+                "violations": viols};
+        f = open(self.out, "w");
+        f.write(json.dumps(data, indent=1));
+        f.close();
+        print(f"wrote {self.out}: {len(nodes)} nodes, {len(edges)} edges, "
+              f"{len(viols)} violations");
+    }
+}
+
 walker Reset {
     can go with Root entry {
         n = 0;
@@ -680,6 +767,19 @@ with entry {
             root spawn Ingest(path=argv[2]);
             print("\ningest done. next: jac run main.jac audit");
         }
+    } elif cmd == "naive" {
+        # what a raw frontier model does with the same script: run it twice
+        text = "";
+        for path in argv[2:] {
+            script = parse_script(path);
+            for sc in script.scenes {
+                text += f"SCENE {fmt_scene(sc.order)}\n{sc.prose}\n\n";
+            }
+        }
+        print("=== raw LLM, same script, asked for plot holes ===");
+        for h in find_plot_holes(text) {
+            print(f"  - {h}");
+        }
     } elif cmd == "audit" {
         root spawn Auditor();
     } elif cmd == "report" {
@@ -688,6 +788,8 @@ with entry {
         root spawn ShowCanon();
     } elif cmd == "score" {
         root spawn Score();
+    } elif cmd == "dump" {
+        root spawn Dump();
     } elif cmd == "reset" {
         root spawn Reset();
     } else {

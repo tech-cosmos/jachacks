@@ -1,0 +1,42 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "CONTINUITY WALKER" [level=1] [ref=e3]
+    - generic [ref=e4]: canon graph · live from jac
+    - generic [ref=e5]: 1 confirmed · 4 declined · 0 withdrawn
+  - main [ref=e6]:
+    - complementary [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: CONFIRMED
+          - generic [ref=e16]: "dothraki_horde.alive: needs true, canon has dead"
+        - generic [ref=e17]: Game of Thrones — S8E5 "The Bells" — scene 2
+        - generic [ref=e18]: "[Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde status = battle_formation [Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde status = weapons_flaming [Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde location = winterfell [Game of Thrones — S8E3 \"The Long Night\" — scene 2] dothraki_horde alive = dead [Game of Thrones — S8E3 \"The Long Night\" — scene 2] dothraki_horde status = wiped_out [Game of Thrones — S8E5 \"The Bells\" — scene 2] dothraki_horde location = kings_landing"
+        - generic [ref=e19]: Canon establishes that the Dothraki horde was wiped out (alive=dead, status=wiped_out) in S8E3 'The Long Night' scene 2, and no subsequent scene in the timeline reestablishes them as alive. Life status changes only via an establishing scene, and none exists to revive them. The later location update in S8E5 scene 2 (location=kings_landing) does not reconcile this, since a dead entity relocating is not itself a resurrection event. The requirement that dothraki_horde alive=true directly contradicts the last established life-status fact.
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e22]: DECLINED
+          - generic [ref=e23]: "daenerys.location: needs kings_landing, canon has dragonstone"
+        - generic [ref=e24]: Game of Thrones — S8E5 "The Bells" — scene 3
+        - generic [ref=e25]: "[Game of Thrones — S8E5 \"The Bells\" — scene 1] daenerys location = dragonstone [Game of Thrones — S8E5 \"The Bells\" — scene 1] daenerys plan = attack_kings_landing [Game of Thrones — S8E5 \"The Bells\" — scene 1] daenerys plan = fleet_attacks_iron_fleet [Game of Thrones — S8E5 \"The Bells\" — scene 3] daenerys action = burning_city [Game of Thrones — S8E5 \"The Bells\" — scene 3] daenerys plan = destroy_kings_landing [Game of Thrones — S8E5 \"The Bells\" — scene 3] daenerys location = kings_landing"
+        - generic [ref=e26]: The canon timeline explicitly states that in scene 3, daenerys location = kings_landing, matching the requirement exactly. There is no contradiction; the location is directly established as required.ed
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]: DECLINED
+          - generic [ref=e30]: "mccallister_phone.status: needs working, canon has local_working"
+        - generic [ref=e31]: Home Alone (1990) — Part 2 — scene 9
+        - generic [ref=e32]: "[Home Alone (1990) — Part 1 — scene 2] mccallister_phone status = down [Home Alone (1990) — Part 1 — scene 5] mccallister_phone status = down [Home Alone (1990) — Part 1 — scene 5.5] mccallister_phone status = long_distance_down [Home Alone (1990) — Part 1 — scene 5.5] mccallister_phone status = local_working [Home Alone (1990) — Part 1 — scene 8] mccallister_phone status = down [Home Alone (1990) — Part 1 — scene 8.5] mccallister_phone status = long_distance_down [Home Alone (1990) — Part 1 — scene 8.5] mccallister_phone status = local_working"
+        - generic [ref=e33]: The latest established state of the mccallister_phone is 'long_distance_down' combined with 'local_working' (Part 1, scene 8.5). Ordering a pizza from Little Nero's for local delivery is a local call, which the timeline explicitly leaves working. The requirement of 'working' is satisfiable by this local-only functionality, so no contradiction exists.
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]: DECLINED
+          - generic [ref=e37]: "mccallister_house.status: needs trapped, canon has rigged_traps"
+        - generic [ref=e38]: Home Alone (1990) — Part 2 — scene 11
+        - generic [ref=e39]: "[Home Alone (1990) — Part 1 — scene 6] mccallister_house status = marked_target [Home Alone (1990) — Part 2 — scene 10] mccallister_house status = rigged_traps"
+        - generic [ref=e40]: "The requirement that mccallister_house status = 'trapped' is satisfied by the established canon state 'rigged_traps' from scene 10 of Part 2. These are just different wordings for the same real-world state: the house has been rigged with traps and is therefore in a 'trapped' condition. The scene excerpt itself confirms this, showing Harry and Marv walking 'into trap after trap' when they break in, which is fully consistent with the house being rigged_traps/trapped. No reconciling change is needed since the states already match semantically."
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: DECLINED
+          - generic [ref=e44]: "dothraki_horde.location: needs fields_winterfell, canon has winterfell"
+        - generic [ref=e45]: Game of Thrones — S8E3 "The Long Night" — scene 2
+        - generic [ref=e46]: "[Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde status = battle_formation [Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde status = weapons_flaming [Game of Thrones — S8E3 \"The Long Night\" — scene 1] dothraki_horde location = winterfell [Game of Thrones — S8E3 \"The Long Night\" — scene 2] dothraki_horde alive = dead [Game of Thrones — S8E3 \"The Long Night\" — scene 2] dothraki_horde status = wiped_out [Game of Thrones — S8E5 \"The Bells\" — scene 2] dothraki_horde location = kings_landing"
+        - generic [ref=e47]: Canon establishes dothraki_horde location = winterfell in scene 1, and the horde is wiped out in scene 2 at that same location (the fields before Winterfell, per the excerpt). 'Fields_winterfell' and 'winterfell' refer to the same location (the battlefield before Winterfell's walls), so this is a wording match, not a contradiction. Their death in scene 2 does not change their location—they die where they were, i.e., in the fields before Winterfell—satisfying the requirement rather than contradicting it.
