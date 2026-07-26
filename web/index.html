@@ -400,6 +400,13 @@ healed ones are WITHDRAWN."></textarea>
           <button id="amendgo">⚖&nbsp; FILE &amp; TEST CONSISTENCY</button>
         </div>
         <div id="amendverdict"></div>
+        <div style="border-top:1.5px dashed var(--paper-line); padding-top:9px">
+          <label>RETRACT A FILING — REMOVES THE DOCUMENT &amp; RE-AUDITS</label>
+          <div class="filerow" style="margin-top:5px">
+            <select id="retractsel" style="flex:1"></select>
+            <button class="minor" id="retract" title="double-click to confirm">🗑 retract</button>
+          </div>
+        </div>
       </div>
 
       <div id="status"><div class="lg" style="color:var(--ink-dim)">canon idle — paste pages or load a reel.</div></div>
@@ -567,8 +574,9 @@ function updateScopeOptions() {
   const sel = $('scope'), had = sel.value;
   const canons = [...new Set((lastData?.elements.nodes || [])
     .map(n => n.data.canon).filter(Boolean))].sort();
-  sel.innerHTML = '<option value="">🔍 all canons</option>' +
-    canons.map(c => `<option value="${c}">${prettyCanon(c)}</option>`).join('');
+  sel.innerHTML = '';
+  sel.appendChild(new Option('🔍 all canons', ''));
+  for (const c of canons) sel.appendChild(new Option(prettyCanon(c), c));
   if (had && canons.includes(had)) sel.value = had;
 }
 
@@ -627,13 +635,51 @@ $('tab-amend').onclick = () => showTab('amend');
 async function loadDocs() {
   try {
     const docs = await (await fetch('/api/docs')).json();
-    const sel = $('amendtarget'), had = sel.value;
-    sel.innerHTML = docs.length
-      ? docs.map(d => `<option value="${d.title}">${d.title} — ${d.kind}, ${d.segments} §</option>`).join('')
-      : '<option value="">— ingest a base document first —</option>';
-    if (had && [...sel.options].some(o => o.value === had)) sel.value = had;
+    for (const id of ['amendtarget', 'retractsel']) {
+      const sel = $(id), had = sel.value;
+      sel.innerHTML = '';
+      if (!docs.length)
+        sel.appendChild(new Option('— ingest a base document first —', ''));
+      for (const d of docs)   /* new Option() keeps quotes in titles intact */
+        sel.appendChild(new Option(`${d.title} — ${d.kind}, ${d.segments} §`, d.title));
+      if (had && [...sel.options].some(o => o.value === had)) sel.value = had;
+    }
   } catch (e) {}
 }
+
+let retractArmed = false;
+$('retract').onclick = async () => {
+  const target = $('retractsel').value;
+  if (!target) return;
+  if (!retractArmed) {
+    retractArmed = true;
+    $('retract').textContent = '🗑 click again to RETRACT';
+    setTimeout(() => { retractArmed = false; $('retract').textContent = '🗑 retract'; }, 2500);
+    return;
+  }
+  retractArmed = false; $('retract').textContent = '🗑 retract';
+  $('retract').disabled = true;
+  $('amendverdict').style.display = 'none';
+  clearLog();
+  logLine(`retracting "${target}" — removing its facts and re-auditing`, 'walking');
+  try {
+    const r = await fetch('/api/retract', { method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target }) });
+    const out = await r.json();
+    clearLog();
+    if (out.error) { logLine('✕ ' + out.error, 'walking'); }
+    else {
+      (out.log || []).forEach(l => logLine(l));
+      const nR = (out.reopened || []).length;
+      logLine(`— canon reverted. ${nR} finding${nR === 1 ? '' : 's'} reopened, `
+        + `${out.cleared || 0} cleared.`);
+      await refresh(out.score);
+      await loadDocs();
+    }
+  } catch (e) { logLine('✕ server unreachable: ' + e.message, 'walking'); }
+  $('retract').disabled = false;
+};
 
 /* read an attached file: text files locally, pdf/docx via the jac server */
 function readUpload(file, cb) {

@@ -101,7 +101,11 @@ the chain of instruments as the proof.
 In the UI, the **AMENDMENT DESK** tab does this live: pick the document it
 amends, paste (or attach) the amendment, hit FILE & TEST CONSISTENCY — the
 whole canon re-audits immediately and you get a CONSISTENT / INCONSISTENT
-stamp with the newly confirmed and newly withdrawn findings. The pre-built
+stamp with the newly confirmed and newly withdrawn findings. It works on
+story canons too — file a what-if scene against a movie and see what it
+breaks. **Retract a filing** (same tab) deletes any document again and
+re-audits, so experiments are fully reversible; verdicts that the filing
+had changed flip back. The pre-built
 corpus is `data/contract_*.txt`; a fully adjudicated snapshot ships as
 `canon_contracts.json`.
 

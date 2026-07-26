@@ -1354,6 +1354,61 @@ def api_amend(body: dict) -> dict {
             "introduced": introduced, "withdrawn": withdrawn};
 }
 
+def api_retract(body: dict) -> dict {
+    target = body.get("target", "");
+    doc = None;
+    for d in all_documents() {
+        if d.title == target {
+            doc = d;
+        }
+    }
+    if doc is None {
+        return {"error": f"no document titled '{target}' in canon"};
+    }
+    before = {};
+    for v in [root -->[?:Violation]] {
+        before[viol_key(v)] = v.status;
+    }
+    n_viols = 0;
+    for v in [root -->[?:Violation]] {
+        if v.req_doc == doc.doc_index {
+            del v;
+            n_viols += 1;
+        }
+    }
+    n_facts = 0;
+    for seg in [doc -->[?:Segment]] {
+        for st in [seg --> ] {
+            del st;
+            n_facts += 1;
+        }
+        del seg;
+    }
+    del doc;
+    log = [f"retracted '{target}': {n_facts} facts and "
+           f"{n_viols} of its findings removed from canon"];
+    root spawn Auditor(quiet=True);
+    data = write_graph("web/graph.json");
+    reopened = [];
+    for v in data["violations"] {
+        was = before.get(v["key"], "");
+        if v["status"] in ["confirmed", "candidate"]
+            and was not in ["confirmed", "candidate"] {
+            reopened.append(v);
+        }
+    }
+    cleared = 0;
+    left = [v["key"] for v in data["violations"]];
+    for k in before.keys() {
+        if before[k] in ["confirmed", "candidate"] and k not in left {
+            cleared += 1;
+        }
+    }
+    return {"log": log, "violations": data["violations"],
+            "score": score_stats(), "retracted": target,
+            "reopened": reopened, "cleared": cleared};
+}
+
 def api_naive(body: dict) -> dict {
     script = parse_script_text(body.get("text", ""), "pasted");
     txt = "";
@@ -1437,6 +1492,8 @@ class ApiHandler(BaseHTTPRequestHandler) {
                 out = api_amend(body);
             } elif p == "/api/extract" {
                 out = api_extract(body);
+            } elif p == "/api/retract" {
+                out = api_retract(body);
             } elif p == "/api/naive" {
                 out = api_naive(body);
             } elif p == "/api/reset" {
