@@ -32,8 +32,19 @@ output comes with the exact chain of scenes that makes it true.
 
 ## Run it
 
+![Continuity Walker UI](web/screenshot.png)
+
+**The UI** (paste a script, or load a sample reel, and hit ANALYZE — the HTTP
+server itself is written in Jac):
+
 ```sh
-pip install jaclang byllm         # plus GEMINI_API_KEY in env
+pip install jaclang byllm         # plus OPENROUTER_API_KEY or GEMINI_API_KEY
+jac run main.jac serve            # → http://localhost:8765
+```
+
+**The CLI**, same engine:
+
+```sh
 jac run main.jac ingest data/home_alone_ep1.txt
 jac run main.jac ingest data/home_alone_ep2.txt
 jac run main.jac audit            # → the Home Alone phone-line plot hole
@@ -41,7 +52,11 @@ jac run main.jac canon            # inspect accumulated canon
 jac run main.jac score            # extraction accuracy vs annotated key facts
 jac run main.jac ingest data/home_alone_amendment.txt   # the fan defense
 jac run main.jac audit            # → watch the finding get withdrawn
+jac run main.jac naive data/home_alone_ep1.txt data/home_alone_ep2.txt
+                                  # → the control group: a raw LLM's answer
 ```
+
+`./demo.sh prep|find|naive|amend|score|serve` drives the whole demo arc.
 
 `CW_NO_LLM=1` runs the graph pipeline on annotated facts only (no API calls);
 `CW_MODEL` overrides the default `gemini/gemini-2.5-flash`.

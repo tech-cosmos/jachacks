@@ -18,6 +18,7 @@ import time;
 import json;
 import litellm;
 import from byllm.llm { Model }
+import from http.server { HTTPServer, BaseHTTPRequestHandler }
 
 def pick_model() -> str {
     m = os.environ.get("CW_MODEL", "");
@@ -300,6 +301,11 @@ def to_order(tag: str, fallback: float) -> float {
     return fallback;
 }
 
+def note(w: object, s: str) {
+    print(s);
+    w.log.append(s);
+}
+
 # ------------------------------------------------------------ script parsing
 
 obj SceneData {
@@ -320,7 +326,11 @@ def parse_script(path: str) -> ScriptData {
     f = open(path, "r");
     text = f.read();
     f.close();
-    title = path;
+    return parse_script_text(text, path);
+}
+
+def parse_script_text(text: str, fallback_title: str) -> ScriptData {
+    title = fallback_title;
     kind = "script";
     vocab = [];
     for raw in text.split("\n") {
@@ -376,10 +386,17 @@ def parse_script(path: str) -> ScriptData {
 # ------------------------------------------------------------------- walkers
 
 walker Ingest {
-    has path: str;
+    has path: str = "";
+    has text: str = "";
+    has title_hint: str = "Pasted Script";
+    has log: list = [];
 
     can go with Root entry {
-        script = parse_script(self.path);
+        if self.text != "" {
+            script = parse_script_text(self.text, self.title_hint);
+        } else {
+            script = parse_script(self.path);
+        }
         docs = all_documents();
         doc = None;
         for d in docs {
@@ -391,9 +408,9 @@ walker Ingest {
             doc = Document(title=script.title, kind=script.kind,
                            doc_index=len(docs));
             here ++> doc;
-            print(f"+ document [{doc.doc_index}] {doc.title}");
+            note(self, f"+ document [{doc.doc_index}] {doc.title}");
         } else {
-            print(f"= document [{doc.doc_index}] {doc.title} (appending)");
+            note(self, f"= document [{doc.doc_index}] {doc.title} (appending)");
         }
 
         no_llm = os.environ.get("CW_NO_LLM", "") == "1";
@@ -406,12 +423,12 @@ walker Ingest {
 
         for sc in script.scenes {
             if sc.order in existing_orders {
-                print(f"  scene {fmt_scene(sc.order)}: already ingested, skipping");
+                note(self, f"  scene {fmt_scene(sc.order)}: already ingested, skipping");
                 continue;
             }
             if no_llm {
                 facts = SceneFacts(establishes=sc.exp_est, requires=sc.exp_req);
-                print(f"  scene {fmt_scene(sc.order)}: structured mode "
+                note(self, f"  scene {fmt_scene(sc.order)}: structured mode "
                       f"({len(sc.exp_est)} est, {len(sc.exp_req)} req)");
             } else {
                 facts = safe_extract(sc.prose, sorted(set(known_subj)),
@@ -419,10 +436,10 @@ walker Ingest {
                 if len(facts.establishes) == 0 and len(facts.requires) == 0
                     and len(sc.exp_est) + len(sc.exp_req) > 0 {
                     facts = SceneFacts(establishes=sc.exp_est, requires=sc.exp_req);
-                    print(f"  scene {fmt_scene(sc.order)}: extraction failed, "
+                    note(self, f"  scene {fmt_scene(sc.order)}: extraction failed, "
                           f"using annotated facts");
                 } else {
-                    print(f"  scene {fmt_scene(sc.order)}: extracted "
+                    note(self, f"  scene {fmt_scene(sc.order)}: extracted "
                           f"{len(facts.establishes)} est, {len(facts.requires)} req");
                 }
             }
@@ -450,7 +467,7 @@ walker Ingest {
                     prev +>:Transition:+> st;
                     st +>:Supersedes:+> prev;
                 }
-                print(f"      + {st.subject} {st.predicate} = {st.value}");
+                note(self, f"      + {st.subject} {st.predicate} = {st.value}");
                 known_subj.append(st.subject);
                 known_pred.append(st.predicate);
             }
@@ -459,7 +476,7 @@ walker Ingest {
                            value=norm(fc.value), doc_index=doc.doc_index,
                            seg_order=sc.order);
                 seg +>:Requires:+> st;
-                print(f"      ? {st.subject} {st.predicate} = {st.value}");
+                note(self, f"      ? {st.subject} {st.predicate} = {st.value}");
             }
 
             if not no_llm {
@@ -477,7 +494,7 @@ walker Ingest {
                 seg.exp_total = len(expected);
                 seg.exp_matched = matched;
                 if len(expected) > 0 {
-                    print(f"      accuracy: {matched}/{len(expected)} key facts");
+                    note(self, f"      accuracy: {matched}/{len(expected)} key facts");
                 }
             }
         }
@@ -526,6 +543,14 @@ walker Auditor {
                 requirement = (f"Scene {fmt_scene(seg.order)} of "
                                f"'{doc_title(seg.doc_index)}' requires: "
                                f"{req.subject} {req.predicate} = {req.value}");
+
+                # verdicts are cached per evidence state: an existing verdict
+                # only re-opens when the canon timeline for its subject changes
+                if key in vmap and vmap[key].timeline == tl
+                    and vmap[key].status in ["confirmed", "declined", "withdrawn"] {
+                    vmap[key].found_value = latest.value;
+                    continue;
+                }
 
                 if req.predicate == "location" {
                     status = "declined";
@@ -638,96 +663,114 @@ walker ShowCanon {
     }
 }
 
+def score_stats() -> dict {
+    total = 0;
+    matched = 0;
+    for seg in all_segments() {
+        total += seg.exp_total;
+        matched += seg.exp_matched;
+    }
+    pct = 0.0;
+    if total > 0 {
+        pct = round(100.0 * matched / total, 1);
+    }
+    return {"expected": total, "matched": matched, "pct": pct};
+}
+
 walker Score {
     can go with Root entry {
-        total = 0;
-        matched = 0;
-        for seg in all_segments() {
-            total += seg.exp_total;
-            matched += seg.exp_matched;
-        }
-        if total == 0 {
+        s = score_stats();
+        if s["expected"] == 0 {
             print("no annotated expectations ingested yet.");
             return;
         }
-        pct = round(100.0 * matched / total, 1);
-        print(f"extraction accuracy: {matched}/{total} annotated key facts "
-              f"recovered = {pct}%");
+        print(f"extraction accuracy: {s['matched']}/{s['expected']} annotated "
+              f"key facts recovered = {s['pct']}%");
     }
+}
+
+def build_graph_payload() -> dict {
+    nodes = [];
+    edges = [];
+    sid = {};
+    i = 0;
+    for d in all_documents() {
+        nodes.append({"data": {"id": f"d{d.doc_index}", "label": d.title,
+                               "type": "document"}});
+    }
+    for seg in all_segments() {
+        segid = f"d{seg.doc_index}s{seg.order}";
+        nodes.append({"data": {"id": segid,
+                               "label": f"scene {fmt_scene(seg.order)}",
+                               "type": "segment"}});
+        edges.append({"data": {"source": f"d{seg.doc_index}",
+                               "target": segid, "kind": "contains"}});
+        for st in [seg ->:Establishes:->] {
+            i += 1;
+            stid = f"st{i}";
+            sid[id(st)] = stid;
+            nodes.append({"data": {"id": stid,
+                "label": f"{st.subject}.{st.predicate} = {st.value}",
+                "type": "state"}});
+            edges.append({"data": {"source": segid, "target": stid,
+                                   "kind": "establishes"}});
+        }
+        for st in [seg ->:Requires:->] {
+            i += 1;
+            stid = f"rq{i}";
+            nodes.append({"data": {"id": stid,
+                "label": f"{st.subject}.{st.predicate} = {st.value}",
+                "type": "requires"}});
+            edges.append({"data": {"source": segid, "target": stid,
+                                   "kind": "requires"}});
+        }
+    }
+    for seg in all_segments() {
+        for st in [seg ->:Establishes:->] {
+            for nxt in [st ->:Transition:->] {
+                if id(st) in sid and id(nxt) in sid {
+                    edges.append({"data": {"source": sid[id(st)],
+                                           "target": sid[id(nxt)],
+                                           "kind": "transition"}});
+                }
+            }
+        }
+    }
+    viols = [];
+    for v in [root -->[?:Violation]] {
+        i += 1;
+        vid = f"v{i}";
+        nodes.append({"data": {"id": vid,
+            "label": f"{v.subject}.{v.predicate}: {v.required_value} vs {v.found_value}",
+            "type": "violation", "status": v.status}});
+        edges.append({"data": {"source": f"d{v.req_doc}s{v.req_seg}",
+                               "target": vid, "kind": "flags"}});
+        viols.append({"subject": v.subject, "predicate": v.predicate,
+                      "required": v.required_value, "found": v.found_value,
+                      "at": f"{doc_title(v.req_doc)} — scene {fmt_scene(v.req_seg)}",
+                      "status": v.status, "confidence": v.confidence,
+                      "timeline": v.timeline, "reasoning": v.reasoning});
+    }
+    return {"elements": {"nodes": nodes, "edges": edges},
+            "violations": viols};
+}
+
+def write_graph(out: str) -> dict {
+    data = build_graph_payload();
+    f = open(out, "w");
+    f.write(json.dumps(data, indent=1));
+    f.close();
+    return data;
 }
 
 walker Dump {
     has out: str = "web/graph.json";
 
     can go with Root entry {
-        nodes = [];
-        edges = [];
-        sid = {};
-        i = 0;
-        for d in all_documents() {
-            nodes.append({"data": {"id": f"d{d.doc_index}", "label": d.title,
-                                   "type": "document"}});
-        }
-        for seg in all_segments() {
-            segid = f"d{seg.doc_index}s{seg.order}";
-            nodes.append({"data": {"id": segid,
-                                   "label": f"scene {fmt_scene(seg.order)}",
-                                   "type": "segment"}});
-            edges.append({"data": {"source": f"d{seg.doc_index}",
-                                   "target": segid, "kind": "contains"}});
-            for st in [seg ->:Establishes:->] {
-                i += 1;
-                stid = f"st{i}";
-                sid[id(st)] = stid;
-                nodes.append({"data": {"id": stid,
-                    "label": f"{st.subject}.{st.predicate} = {st.value}",
-                    "type": "state"}});
-                edges.append({"data": {"source": segid, "target": stid,
-                                       "kind": "establishes"}});
-            }
-            for st in [seg ->:Requires:->] {
-                i += 1;
-                stid = f"rq{i}";
-                nodes.append({"data": {"id": stid,
-                    "label": f"{st.subject}.{st.predicate} = {st.value}",
-                    "type": "requires"}});
-                edges.append({"data": {"source": segid, "target": stid,
-                                       "kind": "requires"}});
-            }
-        }
-        for seg in all_segments() {
-            for st in [seg ->:Establishes:->] {
-                for nxt in [st ->:Transition:->] {
-                    if id(st) in sid and id(nxt) in sid {
-                        edges.append({"data": {"source": sid[id(st)],
-                                               "target": sid[id(nxt)],
-                                               "kind": "transition"}});
-                    }
-                }
-            }
-        }
-        viols = [];
-        for v in [here -->[?:Violation]] {
-            i += 1;
-            vid = f"v{i}";
-            nodes.append({"data": {"id": vid,
-                "label": f"{v.subject}.{v.predicate}: {v.required_value} vs {v.found_value}",
-                "type": "violation", "status": v.status}});
-            edges.append({"data": {"source": f"d{v.req_doc}s{v.req_seg}",
-                                   "target": vid, "kind": "flags"}});
-            viols.append({"subject": v.subject, "predicate": v.predicate,
-                          "required": v.required_value, "found": v.found_value,
-                          "at": f"{doc_title(v.req_doc)} — scene {fmt_scene(v.req_seg)}",
-                          "status": v.status, "confidence": v.confidence,
-                          "timeline": v.timeline, "reasoning": v.reasoning});
-        }
-        data = {"elements": {"nodes": nodes, "edges": edges},
-                "violations": viols};
-        f = open(self.out, "w");
-        f.write(json.dumps(data, indent=1));
-        f.close();
-        print(f"wrote {self.out}: {len(nodes)} nodes, {len(edges)} edges, "
-              f"{len(viols)} violations");
+        data = write_graph(self.out);
+        print(f"wrote {self.out}: {len(data['elements']['nodes'])} nodes, "
+              f"{len(data['elements']['edges'])} edges, "
+              f"{len(data['violations'])} violations");
     }
 }
 
@@ -748,6 +791,109 @@ walker Reset {
         }
         print(f"reset: deleted {n} nodes.");
     }
+}
+
+# ----------------------------------------------------------------- http api
+
+def api_analyze(body: dict) -> dict {
+    w = Ingest(text=body.get("text", ""),
+               title_hint=body.get("title", "Pasted Script"));
+    root spawn w;
+    root spawn Auditor(quiet=True);
+    data = write_graph("web/graph.json");
+    return {"log": w.log, "violations": data["violations"],
+            "score": score_stats()};
+}
+
+def api_naive(body: dict) -> dict {
+    script = parse_script_text(body.get("text", ""), "pasted");
+    txt = "";
+    for sc in script.scenes {
+        txt += f"SCENE {fmt_scene(sc.order)}\n{sc.prose}\n\n";
+    }
+    if txt.strip() == "" {
+        txt = body.get("text", "");
+    }
+    return {"holes": find_plot_holes(txt)};
+}
+
+def api_reset() -> dict {
+    root spawn Reset();
+    write_graph("web/graph.json");
+    return {"ok": True};
+}
+
+class ApiHandler(BaseHTTPRequestHandler) {
+    def _send(self: object, code: int, ctype: str, payload: bytes) {
+        self.send_response(code);
+        self.send_header("Content-Type", ctype);
+        self.send_header("Cache-Control", "no-store");
+        self.end_headers();
+        self.wfile.write(payload);
+    }
+
+    def _file(self: object, relpath: str, ctype: str) {
+        try {
+            f = open(relpath, "rb");
+            data = f.read();
+            f.close();
+            self._send(200, ctype, data);
+        } except Exception as e {
+            self._send(404, "text/plain", "not found".encode());
+        }
+    }
+
+    def do_GET(self: object) {
+        p = self.path.split("?")[0];
+        if p == "/" or p == "/index.html" {
+            self._file("web/index.html", "text/html; charset=utf-8");
+        } elif p == "/graph.json" {
+            self._file("web/graph.json", "application/json");
+        } elif p == "/api/score" {
+            self._send(200, "application/json",
+                       json.dumps(score_stats()).encode());
+        } elif p == "/api/samples" {
+            names = sorted(os.listdir("data"));
+            self._send(200, "application/json", json.dumps(names).encode());
+        } elif p.startswith("/data/") {
+            self._file(f"data/{os.path.basename(p)}",
+                       "text/plain; charset=utf-8");
+        } else {
+            self._send(404, "text/plain", "not found".encode());
+        }
+    }
+
+    def do_POST(self: object) {
+        n = int(self.headers.get("Content-Length", "0"));
+        raw = self.rfile.read(n).decode();
+        body = {};
+        if raw != "" {
+            try {
+                body = json.loads(raw);
+            } except Exception as e {
+                body = {};
+            }
+        }
+        p = self.path.split("?")[0];
+        try {
+            if p == "/api/analyze" {
+                out = api_analyze(body);
+            } elif p == "/api/naive" {
+                out = api_naive(body);
+            } elif p == "/api/reset" {
+                out = api_reset();
+            } else {
+                self._send(404, "text/plain", "not found".encode());
+                return;
+            }
+            self._send(200, "application/json", json.dumps(out).encode());
+        } except Exception as e {
+            self._send(500, "application/json",
+                       json.dumps({"error": str(e)}).encode());
+        }
+    }
+
+    def log_message(self: object, fmt: str, *args: tuple) {}
 }
 
 # --------------------------------------------------------------------- entry
@@ -788,6 +934,14 @@ with entry {
         root spawn ShowCanon();
     } elif cmd == "score" {
         root spawn Score();
+    } elif cmd == "serve" {
+        port = 8765;
+        if len(argv) > 2 {
+            port = int(argv[2]);
+        }
+        write_graph("web/graph.json");
+        print(f"Continuity Walker → http://localhost:{port}");
+        HTTPServer(("0.0.0.0", port), ApiHandler).serve_forever();
     } elif cmd == "dump" {
         root spawn Dump();
     } elif cmd == "reset" {

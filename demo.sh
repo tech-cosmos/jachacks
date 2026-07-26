@@ -40,8 +40,7 @@ case "$1" in
     $J run main.jac canon
     ;;
   serve)
-    echo "viz: http://localhost:8765"
-    python3 -m http.server 8765 -d web
+    $J run main.jac serve
     ;;
   *)
     echo "usage: ./demo.sh prep|find|naive|amend|score|serve" ;;

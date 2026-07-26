@@ -46,14 +46,14 @@
    {
     "data": {
      "id": "st2",
-     "label": "mccallister_family.plan = paris_trip",
+     "label": "kevin.knowledge = wished_family_gone",
      "type": "state"
     }
    },
    {
     "data": {
      "id": "st3",
-     "label": "kevin.knowledge = wished_family_gone",
+     "label": "mccallister_family.plan = paris_trip",
      "type": "state"
     }
    },
@@ -66,6 +66,13 @@
    },
    {
     "data": {
+     "id": "rq5",
+     "label": "mccallister_house.location = kevin_present",
+     "type": "requires"
+    }
+   },
+   {
+    "data": {
      "id": "d0s2.0",
      "label": "scene 2",
      "type": "segment"
@@ -73,23 +80,30 @@
    },
    {
     "data": {
-     "id": "st5",
+     "id": "st6",
      "label": "mccallister_phone.status = down",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st6",
-     "label": "house_power.status = blinked",
+     "id": "st7",
+     "label": "house_power.status = down",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st7",
+     "id": "st8",
      "label": "alarm_clocks.status = reset",
      "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq9",
+     "label": "mccallister_phone.status = working",
+     "type": "requires"
     }
    },
    {
@@ -101,36 +115,36 @@
    },
    {
     "data": {
-     "id": "st8",
-     "label": "alarm_clocks.status = did_not_ring",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st9",
-     "label": "mccallister_family.location = departed",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
      "id": "st10",
-     "label": "kevin.location = mccallister_house",
+     "label": "alarm_clocks.status = didnt_ring",
      "type": "state"
     }
    },
    {
     "data": {
      "id": "st11",
-     "label": "kevin.status = left_behind",
+     "label": "mccallister_family.location = airport",
      "type": "state"
     }
    },
    {
     "data": {
      "id": "st12",
-     "label": "mccallister_family.knowledge = unaware_kevin_missing",
+     "label": "kevin.location = mccallister_house",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st13",
+     "label": "kevin.knowledge = unaware",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st14",
+     "label": "mccallister_family.knowledge = kevin_missing_unnoticed",
      "type": "state"
     }
    },
@@ -143,28 +157,28 @@
    },
    {
     "data": {
-     "id": "st13",
+     "id": "st15",
      "label": "kate.location = airplane",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st14",
-     "label": "kate.knowledge = kevin_forgotten",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st15",
+     "id": "st16",
      "label": "mccallister_family.location = airplane",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st16",
+     "id": "st17",
+     "label": "kate.knowledge = kevin_forgotten",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st18",
      "label": "kevin.location = mccallister_house",
      "type": "state"
     }
@@ -178,28 +192,28 @@
    },
    {
     "data": {
-     "id": "st17",
+     "id": "st19",
      "label": "mccallister_phone.status = down",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st18",
+     "id": "st20",
      "label": "kate.knowledge = phone_down",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st19",
+     "id": "st21",
      "label": "kate.location = paris_airport",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq20",
+     "id": "rq22",
      "label": "kate.location = paris_airport",
      "type": "requires"
     }
@@ -213,30 +227,30 @@
    },
    {
     "data": {
-     "id": "st21",
-     "label": "wet_bandits.location = lincoln_ave",
+     "id": "st23",
+     "label": "wet_bandits.knowledge = houses_empty",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st22",
+     "id": "st24",
      "label": "mccallister_house.status = marked_empty",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st23",
-     "label": "wet_bandits.plan = break_in_mccallister",
+     "id": "st25",
+     "label": "wet_bandits.plan = break_in",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq24",
-     "label": "mccallister_house.location = lincoln_ave",
-     "type": "requires"
+     "id": "st26",
+     "label": "wet_bandits.location = lincoln_avenue",
+     "type": "state"
     }
    },
    {
@@ -248,28 +262,28 @@
    },
    {
     "data": {
-     "id": "st25",
+     "id": "st27",
      "label": "kevin.location = grocery_store",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st26",
+     "id": "st28",
      "label": "kevin.possession = groceries",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st27",
+     "id": "st29",
      "label": "kevin.possession = cash",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq28",
+     "id": "rq30",
      "label": "kevin.possession = cash",
      "type": "requires"
     }
@@ -283,51 +297,30 @@
    },
    {
     "data": {
-     "id": "st29",
-     "label": "mccallister_phone.status = unreachable",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st30",
+     "id": "st31",
      "label": "kate.location = paris_airport",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st31",
-     "label": "kate.plan = book_chicago_flight",
+     "id": "st32",
+     "label": "kate.plan = fly_chicago",
      "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "rq32",
-     "label": "kate.location = paris",
-     "type": "requires"
-    }
-   },
-   {
-    "data": {
-     "id": "d0s8.5",
-     "label": "scene 8.5",
-     "type": "segment"
     }
    },
    {
     "data": {
      "id": "st33",
-     "label": "mccallister_phone.status = local_only",
+     "label": "mccallister_phone.status = down",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st34",
-     "label": "kate.knowledge = local_calls_work",
-     "type": "state"
+     "id": "rq34",
+     "label": "mccallister_phone.status = down",
+     "type": "requires"
     }
    },
    {
@@ -340,14 +333,14 @@
    {
     "data": {
      "id": "st35",
-     "label": "dothraki_horde.status = blades_lit",
+     "label": "dothraki_horde.location = winterfell",
      "type": "state"
     }
    },
    {
     "data": {
      "id": "st36",
-     "label": "dothraki_horde.location = winterfell_front",
+     "label": "dothraki_horde.status = weapons_lit",
      "type": "state"
     }
    },
@@ -367,14 +360,21 @@
    },
    {
     "data": {
-     "id": "rq39",
+     "id": "st39",
+     "label": "dothraki_horde.plan = battle_line",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq40",
      "label": "dothraki_horde.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq40",
+     "id": "rq41",
      "label": "melisandre.alive = true",
      "type": "requires"
     }
@@ -388,42 +388,42 @@
    },
    {
     "data": {
-     "id": "st41",
+     "id": "st42",
      "label": "dothraki_horde.alive = dead",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st42",
+     "id": "st43",
      "label": "dothraki_horde.status = wiped_out",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st43",
+     "id": "st44",
      "label": "army_of_the_dead.location = fields_before_winterfell",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st44",
-     "label": "night_king.plan = advancing",
+     "id": "st45",
+     "label": "night_king.status = advancing",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq45",
-     "label": "dothraki_horde.alive = alive",
+     "id": "rq46",
+     "label": "dothraki_horde.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq46",
+     "id": "rq47",
      "label": "dothraki_horde.location = fields_before_winterfell",
      "type": "requires"
     }
@@ -437,43 +437,50 @@
    },
    {
     "data": {
-     "id": "st47",
+     "id": "st48",
      "label": "night_king.alive = false",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st48",
+     "id": "st49",
      "label": "army_of_the_dead.status = destroyed",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st49",
-     "label": "arya.location = godswood",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
      "id": "st50",
-     "label": "winterfell.status = battle_won",
+     "label": "arya.location = winterfell",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq51",
-     "label": "night_king.alive = true",
+     "id": "st51",
+     "label": "winterfell.status = saved",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st52",
+     "label": "bran.alive = true",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq53",
+     "label": "arya.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq52",
-     "label": "arya.location = godswood",
+     "id": "rq54",
+     "label": "arya.location = winterfell",
      "type": "requires"
     }
    },
@@ -486,36 +493,50 @@
    },
    {
     "data": {
-     "id": "st53",
+     "id": "st55",
      "label": "kevin.location = mccallister_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st54",
+     "id": "st56",
      "label": "kevin.possession = pizza",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st55",
-     "label": "pizza_driver.knowledge = scared_off",
+     "id": "st57",
+     "label": "kevin.plan = gangster_tape",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq56",
+     "id": "st58",
+     "label": "little_neros_driver.alive = true",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st59",
+     "label": "little_neros_driver.status = scared_off",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq60",
      "label": "mccallister_phone.status = working",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq57",
-     "label": "kevin.possession = money",
+     "id": "rq61",
+     "label": "kevin.location = mccallister_house",
      "type": "requires"
     }
    },
@@ -528,35 +549,35 @@
    },
    {
     "data": {
-     "id": "st58",
-     "label": "kevin.knowledge = break_in_plan",
+     "id": "st62",
+     "label": "kevin.knowledge = wet_bandits_plan",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st59",
+     "id": "st63",
      "label": "kevin.plan = defend_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st60",
+     "id": "st64",
      "label": "mccallister_house.status = trapped",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st61",
+     "id": "st65",
      "label": "wet_bandits.plan = break_in_nine",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq62",
+     "id": "rq66",
      "label": "kevin.location = mccallister_house",
      "type": "requires"
     }
@@ -570,57 +591,50 @@
    },
    {
     "data": {
-     "id": "st63",
+     "id": "st67",
      "label": "wet_bandits.location = mccallister_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st64",
-     "label": "kevin.location = murphy_house",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st65",
-     "label": "wet_bandits.location = murphy_house",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st66",
+     "id": "st68",
      "label": "wet_bandits.status = battered",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st67",
-     "label": "kevin.status = cornered",
+     "id": "st69",
+     "label": "kevin.location = murphy_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq68",
-     "label": "mccallister_house.status = trapped",
-     "type": "requires"
+     "id": "st70",
+     "label": "wet_bandits.location = murphy_house",
+     "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq69",
-     "label": "kevin.alive = true",
-     "type": "requires"
-    }
-   },
-   {
-    "data": {
-     "id": "rq70",
+     "id": "st71",
      "label": "murphy_house.status = flooded",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq72",
+     "label": "mccallister_house.status = trap_set",
+     "type": "requires"
+    }
+   },
+   {
+    "data": {
+     "id": "rq73",
+     "label": "kevin.alive = true",
      "type": "requires"
     }
    },
@@ -633,50 +647,50 @@
    },
    {
     "data": {
-     "id": "st71",
+     "id": "st74",
      "label": "wet_bandits.status = defeated",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st72",
+     "id": "st75",
      "label": "wet_bandits.status = arrested",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st73",
+     "id": "st76",
      "label": "kevin.location = mccallister_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st74",
-     "label": "marley.location = murphy_house",
+     "id": "st77",
+     "label": "old_man_marley.location = murphy_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st75",
-     "label": "kevin.possession = safe",
+     "id": "st78",
+     "label": "police.knowledge = bandits_location",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq76",
+     "id": "rq79",
      "label": "kevin.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq77",
-     "label": "wet_bandits.alive = true",
+     "id": "rq80",
+     "label": "wet_bandits.location = murphy_house",
      "type": "requires"
     }
    },
@@ -689,37 +703,23 @@
    },
    {
     "data": {
-     "id": "st78",
+     "id": "st81",
      "label": "kate.location = mccallister_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st79",
+     "id": "st82",
      "label": "mccallister_family.location = mccallister_house",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st80",
-     "label": "kevin.location = mccallister_house",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st81",
+     "id": "st83",
      "label": "kevin.knowledge = secret_kept",
      "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "rq82",
-     "label": "kevin.alive = true",
-     "type": "requires"
     }
    },
    {
@@ -731,36 +731,50 @@
    },
    {
     "data": {
-     "id": "st83",
-     "label": "daenerys.plan = assault_kings_landing",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
      "id": "st84",
-     "label": "daenerys.location = dragonstone",
+     "label": "daenerys.plan = attack_kings_landing",
      "type": "state"
     }
    },
    {
     "data": {
      "id": "st85",
-     "label": "jon_snow.location = dragonstone",
+     "label": "drogon.plan = burn_scorpions",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq86",
+     "id": "st86",
+     "label": "unsullied.plan = storm_gates",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st87",
+     "label": "daenerys.location = dragonstone",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st88",
+     "label": "jon_snow.knowledge = attack_plan",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "rq89",
      "label": "drogon.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq87",
-     "label": "unsullied.alive = true",
+     "id": "rq90",
+     "label": "daenerys.alive = true",
      "type": "requires"
     }
    },
@@ -773,50 +787,43 @@
    },
    {
     "data": {
-     "id": "st88",
+     "id": "st91",
      "label": "kings_landing.status = breached",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st89",
+     "id": "st92",
      "label": "dothraki_horde.location = kings_landing",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st90",
-     "label": "golden_company.status = routed",
+     "id": "st93",
+     "label": "golden_company.alive = false",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st91",
-     "label": "golden_company.alive = dying",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "st92",
+     "id": "st94",
      "label": "unsullied.location = kings_landing",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "rq93",
+     "id": "rq95",
      "label": "dothraki_horde.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "rq94",
-     "label": "unsullied.alive = true",
+     "id": "rq96",
+     "label": "golden_company.alive = true",
      "type": "requires"
     }
    },
@@ -829,59 +836,43 @@
    },
    {
     "data": {
-     "id": "st95",
+     "id": "st97",
      "label": "kings_landing.status = surrendered",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st96",
+     "id": "st98",
+     "label": "daenerys.location = kings_landing",
+     "type": "state"
+    }
+   },
+   {
+    "data": {
+     "id": "st99",
      "label": "daenerys.plan = burn_city",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st97",
+     "id": "st100",
      "label": "kings_landing.status = burning",
      "type": "state"
     }
    },
    {
     "data": {
-     "id": "st98",
-     "label": "daenerys.location = red_keep",
-     "type": "state"
-    }
-   },
-   {
-    "data": {
-     "id": "rq99",
+     "id": "rq101",
      "label": "drogon.alive = true",
      "type": "requires"
     }
    },
    {
     "data": {
-     "id": "v100",
-     "label": "mccallister_phone.status: working vs local_only",
-     "type": "violation",
-     "status": "declined"
-    }
-   },
-   {
-    "data": {
-     "id": "v101",
-     "label": "kate.location: paris_airport vs airplane",
-     "type": "violation",
-     "status": "declined"
-    }
-   },
-   {
-    "data": {
      "id": "v102",
-     "label": "kevin.possession: money vs cash",
+     "label": "dothraki_horde.location: fields_before_winterfell vs winterfell",
      "type": "violation",
      "status": "declined"
     }
@@ -889,15 +880,15 @@
    {
     "data": {
      "id": "v103",
-     "label": "kate.location: paris vs paris_airport",
+     "label": "mccallister_house.status: trap_set vs trapped",
      "type": "violation",
-     "status": "withdrawn"
+     "status": "declined"
     }
    },
    {
     "data": {
      "id": "v104",
-     "label": "dothraki_horde.alive: true vs dead",
+     "label": "mccallister_phone.status: working vs down",
      "type": "violation",
      "status": "confirmed"
     }
@@ -905,7 +896,23 @@
    {
     "data": {
      "id": "v105",
-     "label": "dothraki_horde.location: fields_before_winterfell vs winterfell_front",
+     "label": "kevin.location: mccallister_house vs grocery_store",
+     "type": "violation",
+     "status": "declined"
+    }
+   },
+   {
+    "data": {
+     "id": "v106",
+     "label": "dothraki_horde.alive: true vs dead",
+     "type": "violation",
+     "status": "confirmed"
+    }
+   },
+   {
+    "data": {
+     "id": "v107",
+     "label": "kate.location: paris_airport vs airplane",
      "type": "violation",
      "status": "declined"
     }
@@ -949,16 +956,16 @@
    },
    {
     "data": {
-     "source": "d0",
-     "target": "d0s2.0",
-     "kind": "contains"
+     "source": "d0s1.0",
+     "target": "rq5",
+     "kind": "requires"
     }
    },
    {
     "data": {
-     "source": "d0s2.0",
-     "target": "st5",
-     "kind": "establishes"
+     "source": "d0",
+     "target": "d0s2.0",
+     "kind": "contains"
     }
    },
    {
@@ -977,23 +984,23 @@
    },
    {
     "data": {
-     "source": "d0",
-     "target": "d0s3.0",
-     "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s3.0",
+     "source": "d0s2.0",
      "target": "st8",
      "kind": "establishes"
     }
    },
    {
     "data": {
-     "source": "d0s3.0",
-     "target": "st9",
-     "kind": "establishes"
+     "source": "d0s2.0",
+     "target": "rq9",
+     "kind": "requires"
+    }
+   },
+   {
+    "data": {
+     "source": "d0",
+     "target": "d0s3.0",
+     "kind": "contains"
     }
    },
    {
@@ -1019,23 +1026,23 @@
    },
    {
     "data": {
-     "source": "d0",
-     "target": "d0s4.0",
-     "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s4.0",
+     "source": "d0s3.0",
      "target": "st13",
      "kind": "establishes"
     }
    },
    {
     "data": {
-     "source": "d0s4.0",
+     "source": "d0s3.0",
      "target": "st14",
      "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0",
+     "target": "d0s4.0",
+     "kind": "contains"
     }
    },
    {
@@ -1054,23 +1061,23 @@
    },
    {
     "data": {
-     "source": "d0",
-     "target": "d0s5.0",
-     "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s5.0",
+     "source": "d0s4.0",
      "target": "st17",
      "kind": "establishes"
     }
    },
    {
     "data": {
-     "source": "d0s5.0",
+     "source": "d0s4.0",
      "target": "st18",
      "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0",
+     "target": "d0s5.0",
+     "kind": "contains"
     }
    },
    {
@@ -1083,7 +1090,21 @@
    {
     "data": {
      "source": "d0s5.0",
-     "target": "rq20",
+     "target": "st20",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s5.0",
+     "target": "st21",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s5.0",
+     "target": "rq22",
      "kind": "requires"
     }
    },
@@ -1097,20 +1118,6 @@
    {
     "data": {
      "source": "d0s6.0",
-     "target": "st21",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s6.0",
-     "target": "st22",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s6.0",
      "target": "st23",
      "kind": "establishes"
     }
@@ -1118,8 +1125,22 @@
    {
     "data": {
      "source": "d0s6.0",
-     "target": "rq24",
-     "kind": "requires"
+     "target": "st24",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s6.0",
+     "target": "st25",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s6.0",
+     "target": "st26",
+     "kind": "establishes"
     }
    },
    {
@@ -1132,20 +1153,6 @@
    {
     "data": {
      "source": "d0s7.0",
-     "target": "st25",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s7.0",
-     "target": "st26",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s7.0",
      "target": "st27",
      "kind": "establishes"
     }
@@ -1153,7 +1160,21 @@
    {
     "data": {
      "source": "d0s7.0",
-     "target": "rq28",
+     "target": "st28",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s7.0",
+     "target": "st29",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s7.0",
+     "target": "rq30",
      "kind": "requires"
     }
    },
@@ -1167,20 +1188,6 @@
    {
     "data": {
      "source": "d0s8.0",
-     "target": "st29",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s8.0",
-     "target": "st30",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s8.0",
      "target": "st31",
      "kind": "establishes"
     }
@@ -1188,29 +1195,22 @@
    {
     "data": {
      "source": "d0s8.0",
-     "target": "rq32",
-     "kind": "requires"
+     "target": "st32",
+     "kind": "establishes"
     }
    },
    {
     "data": {
-     "source": "d0",
-     "target": "d0s8.5",
-     "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d0s8.5",
+     "source": "d0s8.0",
      "target": "st33",
      "kind": "establishes"
     }
    },
    {
     "data": {
-     "source": "d0s8.5",
-     "target": "st34",
-     "kind": "establishes"
+     "source": "d0s8.0",
+     "target": "rq34",
+     "kind": "requires"
     }
    },
    {
@@ -1251,8 +1251,8 @@
    {
     "data": {
      "source": "d1s1.0",
-     "target": "rq39",
-     "kind": "requires"
+     "target": "st39",
+     "kind": "establishes"
     }
    },
    {
@@ -1264,16 +1264,16 @@
    },
    {
     "data": {
-     "source": "d1",
-     "target": "d1s2.0",
-     "kind": "contains"
+     "source": "d1s1.0",
+     "target": "rq41",
+     "kind": "requires"
     }
    },
    {
     "data": {
-     "source": "d1s2.0",
-     "target": "st41",
-     "kind": "establishes"
+     "source": "d1",
+     "target": "d1s2.0",
+     "kind": "contains"
     }
    },
    {
@@ -1300,8 +1300,8 @@
    {
     "data": {
      "source": "d1s2.0",
-     "target": "rq45",
-     "kind": "requires"
+     "target": "st45",
+     "kind": "establishes"
     }
    },
    {
@@ -1313,16 +1313,16 @@
    },
    {
     "data": {
-     "source": "d1",
-     "target": "d1s3.0",
-     "kind": "contains"
+     "source": "d1s2.0",
+     "target": "rq47",
+     "kind": "requires"
     }
    },
    {
     "data": {
-     "source": "d1s3.0",
-     "target": "st47",
-     "kind": "establishes"
+     "source": "d1",
+     "target": "d1s3.0",
+     "kind": "contains"
     }
    },
    {
@@ -1349,14 +1349,28 @@
    {
     "data": {
      "source": "d1s3.0",
-     "target": "rq51",
+     "target": "st51",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d1s3.0",
+     "target": "st52",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d1s3.0",
+     "target": "rq53",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d1s3.0",
-     "target": "rq52",
+     "target": "rq54",
      "kind": "requires"
     }
    },
@@ -1370,20 +1384,6 @@
    {
     "data": {
      "source": "d2s9.0",
-     "target": "st53",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s9.0",
-     "target": "st54",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s9.0",
      "target": "st55",
      "kind": "establishes"
     }
@@ -1391,14 +1391,42 @@
    {
     "data": {
      "source": "d2s9.0",
-     "target": "rq56",
+     "target": "st56",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s9.0",
+     "target": "st57",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s9.0",
+     "target": "st58",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s9.0",
+     "target": "st59",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s9.0",
+     "target": "rq60",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d2s9.0",
-     "target": "rq57",
+     "target": "rq61",
      "kind": "requires"
     }
    },
@@ -1412,35 +1440,35 @@
    {
     "data": {
      "source": "d2s10.0",
-     "target": "st58",
+     "target": "st62",
      "kind": "establishes"
     }
    },
    {
     "data": {
      "source": "d2s10.0",
-     "target": "st59",
+     "target": "st63",
      "kind": "establishes"
     }
    },
    {
     "data": {
      "source": "d2s10.0",
-     "target": "st60",
+     "target": "st64",
      "kind": "establishes"
     }
    },
    {
     "data": {
      "source": "d2s10.0",
-     "target": "st61",
+     "target": "st65",
      "kind": "establishes"
     }
    },
    {
     "data": {
      "source": "d2s10.0",
-     "target": "rq62",
+     "target": "rq66",
      "kind": "requires"
     }
    },
@@ -1454,34 +1482,6 @@
    {
     "data": {
      "source": "d2s11.0",
-     "target": "st63",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s11.0",
-     "target": "st64",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s11.0",
-     "target": "st65",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s11.0",
-     "target": "st66",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s11.0",
      "target": "st67",
      "kind": "establishes"
     }
@@ -1489,21 +1489,42 @@
    {
     "data": {
      "source": "d2s11.0",
-     "target": "rq68",
+     "target": "st68",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s11.0",
+     "target": "st69",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s11.0",
+     "target": "st70",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s11.0",
+     "target": "st71",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s11.0",
+     "target": "rq72",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d2s11.0",
-     "target": "rq69",
-     "kind": "requires"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s11.0",
-     "target": "rq70",
+     "target": "rq73",
      "kind": "requires"
     }
    },
@@ -1512,27 +1533,6 @@
      "source": "d2",
      "target": "d2s12.0",
      "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s12.0",
-     "target": "st71",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s12.0",
-     "target": "st72",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s12.0",
-     "target": "st73",
-     "kind": "establishes"
     }
    },
    {
@@ -1552,14 +1552,35 @@
    {
     "data": {
      "source": "d2s12.0",
-     "target": "rq76",
+     "target": "st76",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s12.0",
+     "target": "st77",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s12.0",
+     "target": "st78",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s12.0",
+     "target": "rq79",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d2s12.0",
-     "target": "rq77",
+     "target": "rq80",
      "kind": "requires"
     }
    },
@@ -1573,27 +1594,6 @@
    {
     "data": {
      "source": "d2s13.0",
-     "target": "st78",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s13.0",
-     "target": "st79",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s13.0",
-     "target": "st80",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s13.0",
      "target": "st81",
      "kind": "establishes"
     }
@@ -1601,8 +1601,15 @@
    {
     "data": {
      "source": "d2s13.0",
-     "target": "rq82",
-     "kind": "requires"
+     "target": "st82",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d2s13.0",
+     "target": "st83",
+     "kind": "establishes"
     }
    },
    {
@@ -1610,13 +1617,6 @@
      "source": "d3",
      "target": "d3s1.0",
      "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s1.0",
-     "target": "st83",
-     "kind": "establishes"
     }
    },
    {
@@ -1636,14 +1636,35 @@
    {
     "data": {
      "source": "d3s1.0",
-     "target": "rq86",
+     "target": "st86",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s1.0",
+     "target": "st87",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s1.0",
+     "target": "st88",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s1.0",
+     "target": "rq89",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d3s1.0",
-     "target": "rq87",
+     "target": "rq90",
      "kind": "requires"
     }
    },
@@ -1652,27 +1673,6 @@
      "source": "d3",
      "target": "d3s2.0",
      "kind": "contains"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s2.0",
-     "target": "st88",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s2.0",
-     "target": "st89",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s2.0",
-     "target": "st90",
-     "kind": "establishes"
     }
    },
    {
@@ -1692,14 +1692,28 @@
    {
     "data": {
      "source": "d3s2.0",
-     "target": "rq93",
+     "target": "st93",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s2.0",
+     "target": "st94",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s2.0",
+     "target": "rq95",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "d3s2.0",
-     "target": "rq94",
+     "target": "rq96",
      "kind": "requires"
     }
    },
@@ -1713,20 +1727,6 @@
    {
     "data": {
      "source": "d3s3.0",
-     "target": "st95",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s3.0",
-     "target": "st96",
-     "kind": "establishes"
-    }
-   },
-   {
-    "data": {
-     "source": "d3s3.0",
      "target": "st97",
      "kind": "establishes"
     }
@@ -1741,280 +1741,266 @@
    {
     "data": {
      "source": "d3s3.0",
-     "target": "rq99",
+     "target": "st99",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s3.0",
+     "target": "st100",
+     "kind": "establishes"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s3.0",
+     "target": "rq101",
      "kind": "requires"
     }
    },
    {
     "data": {
      "source": "st1",
+     "target": "st12",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st2",
+     "target": "st13",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st8",
      "target": "st10",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st3",
-     "target": "st58",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st4",
-     "target": "st11",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st7",
-     "target": "st8",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st9",
-     "target": "st15",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
      "source": "st11",
-     "target": "st67",
+     "target": "st16",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st13",
-     "target": "st19",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st14",
-     "target": "st18",
+     "target": "st62",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st15",
-     "target": "st79",
+     "target": "st21",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st16",
-     "target": "st25",
+     "target": "st82",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st17",
-     "target": "st29",
+     "target": "st20",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st18",
-     "target": "st34",
+     "target": "st27",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st21",
-     "target": "st65",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st21",
-     "target": "st63",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st22",
-     "target": "st60",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st23",
-     "target": "st61",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st25",
-     "target": "st53",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st26",
-     "target": "st54",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st29",
-     "target": "st33",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st30",
-     "target": "st78",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st35",
-     "target": "st42",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st36",
-     "target": "st89",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st37",
-     "target": "st92",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st53",
+     "source": "st24",
      "target": "st64",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st54",
-     "target": "st75",
+     "source": "st25",
+     "target": "st65",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st58",
+     "source": "st26",
+     "target": "st67",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st26",
+     "target": "st70",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st27",
+     "target": "st55",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st28",
+     "target": "st56",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st31",
      "target": "st81",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st64",
-     "target": "st73",
+     "source": "st35",
+     "target": "st92",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st66",
-     "target": "st71",
+     "source": "st36",
+     "target": "st43",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st66",
-     "target": "st72",
+     "source": "st37",
+     "target": "st94",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st83",
-     "target": "st96",
+     "source": "st55",
+     "target": "st69",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st57",
+     "target": "st63",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st62",
+     "target": "st83",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st68",
+     "target": "st74",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st68",
+     "target": "st75",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st69",
+     "target": "st76",
      "kind": "transition"
     }
    },
    {
     "data": {
      "source": "st84",
+     "target": "st99",
+     "kind": "transition"
+    }
+   },
+   {
+    "data": {
+     "source": "st87",
      "target": "st98",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "st88",
-     "target": "st95",
-     "kind": "transition"
-    }
-   },
-   {
-    "data": {
-     "source": "st88",
+     "source": "st91",
      "target": "st97",
      "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "d2s9.0",
-     "target": "v100",
-     "kind": "flags"
+     "source": "st91",
+     "target": "st100",
+     "kind": "transition"
     }
    },
    {
     "data": {
-     "source": "d0s5.0",
-     "target": "v101",
-     "kind": "flags"
-    }
-   },
-   {
-    "data": {
-     "source": "d2s9.0",
+     "source": "d1s2.0",
      "target": "v102",
      "kind": "flags"
     }
    },
    {
     "data": {
-     "source": "d0s8.0",
+     "source": "d2s11.0",
      "target": "v103",
      "kind": "flags"
     }
    },
    {
     "data": {
-     "source": "d3s2.0",
+     "source": "d2s9.0",
      "target": "v104",
      "kind": "flags"
     }
    },
    {
     "data": {
-     "source": "d1s2.0",
+     "source": "d2s9.0",
      "target": "v105",
+     "kind": "flags"
+    }
+   },
+   {
+    "data": {
+     "source": "d3s2.0",
+     "target": "v106",
+     "kind": "flags"
+    }
+   },
+   {
+    "data": {
+     "source": "d0s5.0",
+     "target": "v107",
      "kind": "flags"
     }
    }
@@ -2022,47 +2008,47 @@
  },
  "violations": [
   {
-   "subject": "mccallister_phone",
-   "predicate": "status",
-   "required": "working",
-   "found": "local_only",
-   "at": "Home Alone (1990) \u2014 Part 2 \u2014 scene 9",
-   "status": "declined",
-   "confidence": "high",
-   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 2] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] mccallister_phone status = unreachable\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8.5] mccallister_phone status = local_only",
-   "reasoning": "The last established phone state is 'local_only' (scene 8.5), which explicitly means local calls still function while long-distance/outside calls do not. Ordering a pizza from Little Nero's is a local call, so this state satisfies the scene's need for a working phone for that specific use. This matches the actual film logic where Kevin can call locally (pizza, police) but can't reach his family abroad. No contradiction exists since the timeline's own final state accounts for the required use case."
-  },
-  {
-   "subject": "kate",
+   "subject": "dothraki_horde",
    "predicate": "location",
-   "required": "paris_airport",
-   "found": "airplane",
-   "at": "Home Alone (1990) \u2014 Part 1 \u2014 scene 5",
+   "required": "fields_before_winterfell",
+   "found": "winterfell",
+   "at": "Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2",
    "status": "declined",
    "confidence": "rule",
-   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate location = airplane\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate knowledge = kevin_forgotten\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate knowledge = phone_down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate plan = book_chicago_flight\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8.5] kate knowledge = local_calls_work\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kate location = mccallister_house",
+   "timeline": "  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde location = winterfell\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde status = weapons_lit\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde plan = battle_line\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde alive = dead\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde status = wiped_out\n  [Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2] dothraki_horde location = kings_landing",
    "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
   },
   {
-   "subject": "kevin",
-   "predicate": "possession",
-   "required": "money",
-   "found": "cash",
-   "at": "Home Alone (1990) \u2014 Part 2 \u2014 scene 9",
+   "subject": "mccallister_house",
+   "predicate": "status",
+   "required": "trap_set",
+   "found": "trapped",
+   "at": "Home Alone (1990) \u2014 Part 2 \u2014 scene 11",
    "status": "declined",
    "confidence": "high",
-   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin location = attic_bedroom\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin knowledge = wished_family_gone\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin status = punished\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin status = left_behind\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin location = grocery_store\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = groceries\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = cash\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin possession = pizza\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin knowledge = break_in_plan\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin plan = defend_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 11] kevin location = murphy_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 11] kevin status = cornered\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 12] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 12] kevin possession = safe\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin knowledge = secret_kept",
-   "reasoning": "Kevin acquired cash at the grocery store in Part 1, scene 7. Nothing in the canon timeline shows that cash being spent, lost, or taken away before Part 2 scene 9. 'Money' and 'cash' refer to the same possession under different wording, so the requirement is satisfied by the persisting state from scene 7. The scene 9 excerpt itself even shows Kevin paying for the pizza, consistent with him still possessing money at that point. This is not a contradiction."
+   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 6] mccallister_house status = marked_empty\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] mccallister_house status = trapped",
+   "reasoning": "The latest canon state (scene 10: status = trapped) matches the requirement (status = trap_set) as they describe the same real state \u2014 the house has traps set/laid, which is what 'trapped' conveys. This is a wording difference, not a contradiction. No reconciling change is needed since the states align semantically."
   },
   {
-   "subject": "kate",
+   "subject": "mccallister_phone",
+   "predicate": "status",
+   "required": "working",
+   "found": "down",
+   "at": "Home Alone (1990) \u2014 Part 2 \u2014 scene 9",
+   "status": "confirmed",
+   "confidence": "high",
+   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 2] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] mccallister_phone status = down",
+   "reasoning": "Canon establishes mccallister_phone status = down across three consecutive scenes in Part 1, with no scene showing it being repaired or restored. Scene 9 requires the phone to be working so Kevin can call and order pizza. Since phone service is a device/system state that only changes via an explicit establishing scene (someone fixing it), and no such scene exists, the requirement contradicts the last established canon state."
+  },
+  {
+   "subject": "kevin",
    "predicate": "location",
-   "required": "paris",
-   "found": "paris_airport",
-   "at": "Home Alone (1990) \u2014 Part 1 \u2014 scene 8",
-   "status": "withdrawn",
+   "required": "mccallister_house",
+   "found": "grocery_store",
+   "at": "Home Alone (1990) \u2014 Part 2 \u2014 scene 9",
+   "status": "declined",
    "confidence": "rule",
-   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate location = airplane\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate knowledge = kevin_forgotten\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate knowledge = phone_down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate plan = book_chicago_flight\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8.5] kate knowledge = local_calls_work\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kate location = mccallister_house",
+   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin location = attic_bedroom\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin knowledge = wished_family_gone\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin status = punished\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin knowledge = unaware\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin location = grocery_store\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = groceries\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = cash\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin possession = pizza\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin plan = gangster_tape\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin knowledge = wet_bandits_plan\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin plan = defend_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 11] kevin location = murphy_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 12] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin knowledge = secret_kept",
    "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
   },
   {
@@ -2073,18 +2059,18 @@
    "at": "Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2",
    "status": "confirmed",
    "confidence": "high",
-   "timeline": "  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde status = blades_lit\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde location = winterfell_front\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde alive = dead\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde status = wiped_out\n  [Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2] dothraki_horde location = kings_landing",
-   "reasoning": "Canon establishes in S8E3 scene 2 that the dothraki_horde alive=dead and status=wiped_out, with no later scene establishing a reversal or resurrection. The requirement for S8E5 scene 2 needs dothraki_horde alive=true, but the last established state is death/wiped_out. Life status changes require an explicit establishing scene (e.g., a resurrection or retcon), which is absent here. The later location update to kings_landing does not itself imply the horde is alive, since location is a movable-object fact but does not override an explicit death/wiped_out status without a reconciling scene."
+   "timeline": "  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde location = winterfell\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde status = weapons_lit\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde plan = battle_line\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde alive = dead\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde status = wiped_out\n  [Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2] dothraki_horde location = kings_landing",
+   "reasoning": "Canon explicitly states that in S8E3 'The Long Night' scene 2, the dothraki_horde alive = dead and status = wiped_out, with no later scene establishing a revival or reconciling change. The subsequent S8E5 scene only updates location to king's landing without addressing the alive status. Since life status changes only via an explicit establishing scene, and none exists here reviving the horde, requiring the horde to be alive in S8E5 scene 2 directly contradicts the last established state of death/wipeout from S8E3."
   },
   {
-   "subject": "dothraki_horde",
+   "subject": "kate",
    "predicate": "location",
-   "required": "fields_before_winterfell",
-   "found": "winterfell_front",
-   "at": "Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2",
+   "required": "paris_airport",
+   "found": "airplane",
+   "at": "Home Alone (1990) \u2014 Part 1 \u2014 scene 5",
    "status": "declined",
    "confidence": "rule",
-   "timeline": "  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde status = blades_lit\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde location = winterfell_front\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde alive = dead\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde status = wiped_out\n  [Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2] dothraki_horde location = kings_landing",
+   "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate location = airplane\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kate knowledge = kevin_forgotten\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate knowledge = phone_down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate location = paris_airport\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] kate plan = fly_chicago\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kate location = mccallister_house",
    "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
   }
  ]
