@@ -1,0 +1,60 @@
+# TITLE: Home Alone (1990) — Part 1
+# KIND: film script
+
+## SCENE 1
+INT. MCCALLISTER HOUSE - NIGHT. The house is chaos on the eve of the family's
+Christmas trip to Paris. Eight-year-old Kevin fights with his older brother
+Buzz over the last cheese pizza and is sent by his mother to sleep upstairs in
+the attic bedroom as punishment. Kevin tells her he wishes his family would
+disappear.
+@expect establishes kevin | location | attic
+@expect establishes mccallister_family | plan | paris_trip
+
+## SCENE 2
+EXT. MCCALLISTER HOUSE - LATER THAT NIGHT. A violent winter storm batters the
+neighborhood. A heavy tree branch snaps under the wind and ice and crashes
+down across the telephone lines outside, tearing them from the pole. Telephone
+service to the McCallister house is knocked out. The power also blinks out for
+a moment, silently resetting every alarm clock in the house.
+@expect establishes mccallister_phone | status | down
+@expect establishes alarm_clocks | status | reset
+
+## SCENE 3
+INT. MCCALLISTER HOUSE - MORNING. The family oversleeps — the reset alarm
+clocks never rang. In the frantic scramble to make the flight, a neighbor kid
+in the garage is miscounted as one of the children, and the airport shuttle
+vans tear off without anyone checking the attic. Kevin, still asleep upstairs,
+is left behind.
+@expect requires alarm_clocks | status | reset
+@expect establishes mccallister_family | location | airport
+@expect establishes kevin | location | home_alone
+
+## SCENE 4
+INT. AIRPLANE - DAY. Somewhere over the Atlantic, Kate McCallister bolts
+upright in her seat with a gasp: they forgot Kevin.
+@expect establishes kate | knowledge | kevin_left_behind
+
+## SCENE 5
+INT. PARIS AIRPORT - DAY. Kate rushes to a bank of payphones to call the
+house. An operator tells her the storm has downed the telephone lines in
+Kevin's neighborhood and her call cannot go through. She cannot reach her son.
+@expect requires mccallister_phone | status | down
+@expect establishes mccallister_phone | status | down
+
+## SCENE 6
+EXT. LINCOLN AVENUE - DAY. Harry and Marv, the self-styled "Wet Bandits,"
+cruise the block in a panel van, noting which families have left for the
+holidays. They mark the McCallister house as empty and plan to break in.
+@expect establishes wet_bandits | plan | rob_mccallister_house
+
+## SCENE 7
+INT. GROCERY STORE - DAY. Kevin, on his own, walks to the store and does the
+family shopping with cash he found around the house — milk, orange juice,
+laundry detergent, and a toothbrush.
+@expect requires kevin | location | home_alone
+
+## SCENE 8
+INT. PARIS AIRPORT - NIGHT. Unable to reach the house on any line, Kate burns
+through standby lists at every airline counter, trying to book any seat on any
+flight back to Chicago.
+@expect requires mccallister_phone | status | down

@@ -1,0 +1,10 @@
+# TITLE: Home Alone (1990) — Part 1
+# KIND: film script
+
+## SCENE 5.5
+INT. PARIS AIRPORT - DAY (ADDITIONAL DIALOGUE). The operator clarifies the
+outage for Kate: the storm took down the long-distance trunk lines into
+Kevin's neighborhood only. Local telephone calls placed within the
+neighborhood still connect normally — the McCallister phone can still reach
+local numbers. It is only long-distance service into the area that is out.
+@expect establishes mccallister_phone | status | working

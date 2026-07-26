@@ -1,0 +1,42 @@
+# TITLE: Home Alone (1990) — Part 2
+# KIND: film script
+
+## SCENE 9
+INT. MCCALLISTER HOUSE, KITCHEN - EVENING. Kevin, home alone, picks up the
+kitchen telephone and orders a large cheese pizza for delivery from Little
+Nero's. A short while later the delivery driver pulls up and Kevin pays for
+the pizza through the mail slot, scaring the driver off with gangster-movie
+gunfire played from a VCR tape.
+@expect requires mccallister_phone | status | working
+
+## SCENE 10
+INT. MCCALLISTER HOUSE - NIGHT. Kevin overhears Harry and Marv outside
+planning to break into his house at nine o'clock. He decides to defend his
+home, sketches a battle plan, and rigs the house with traps — a blowtorch over
+the back door, a hot doorknob, tar on the basement stairs, paint cans on the
+staircase.
+@expect requires kevin | location | home_alone
+@expect establishes kevin | knowledge | bandits_plan
+@expect establishes mccallister_house | status | trapped
+
+## SCENE 11
+INT./EXT. MCCALLISTER HOUSE - NIGHT. Harry and Marv break in at nine and walk
+into trap after trap. Battered and furious, they chase Kevin out of the house.
+Kevin runs across the street to the flooded Murphy house, where the bandits
+finally corner him.
+@expect requires mccallister_house | status | trapped
+@expect requires wet_bandits | plan | rob_mccallister_house
+
+## SCENE 12
+EXT. MURPHY HOUSE - NIGHT. Old Man Marley appears out of the dark and drops
+the bandits with his snow shovel, carrying Kevin home. Police arrive moments
+later and arrest Harry and Marv.
+@expect establishes wet_bandits | status | arrested
+
+## SCENE 13
+INT. MCCALLISTER HOUSE - CHRISTMAS MORNING. Kate finally makes it home in the
+back of a polka band's box truck. The rest of the family arrives minutes
+later, straight from the airport. Kevin greets them; he never tells anyone
+what happened.
+@expect establishes kate | location | home
+@expect establishes mccallister_family | location | home
