@@ -1,5 +1,6 @@
 # TITLE: Home Alone (1990) — Part 1
 # KIND: film script
+# VOCAB: kevin, kate, mccallister_family, mccallister_phone, mccallister_house, alarm_clocks, house_power, wet_bandits, murphy_house
 
 ## SCENE 5.5
 INT. PARIS AIRPORT - DAY (ADDITIONAL DIALOGUE). The operator clarifies the

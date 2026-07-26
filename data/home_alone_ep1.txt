@@ -1,5 +1,6 @@
 # TITLE: Home Alone (1990) — Part 1
 # KIND: film script
+# VOCAB: kevin, kate, mccallister_family, mccallister_phone, mccallister_house, alarm_clocks, house_power, wet_bandits, murphy_house
 
 ## SCENE 1
 INT. MCCALLISTER HOUSE - NIGHT. The house is chaos on the eve of the family's
@@ -27,7 +28,7 @@ vans tear off without anyone checking the attic. Kevin, still asleep upstairs,
 is left behind.
 @expect requires alarm_clocks | status | reset
 @expect establishes mccallister_family | location | airport
-@expect establishes kevin | location | home_alone
+@expect establishes kevin | location | mccallister_house
 
 ## SCENE 4
 INT. AIRPLANE - DAY. Somewhere over the Atlantic, Kate McCallister bolts
@@ -51,7 +52,7 @@ holidays. They mark the McCallister house as empty and plan to break in.
 INT. GROCERY STORE - DAY. Kevin, on his own, walks to the store and does the
 family shopping with cash he found around the house — milk, orange juice,
 laundry detergent, and a toothbrush.
-@expect requires kevin | location | home_alone
+@expect requires kevin | possession | cash
 
 ## SCENE 8
 INT. PARIS AIRPORT - NIGHT. Unable to reach the house on any line, Kate burns

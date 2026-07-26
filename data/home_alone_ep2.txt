@@ -1,5 +1,6 @@
 # TITLE: Home Alone (1990) — Part 2
 # KIND: film script
+# VOCAB: kevin, kate, mccallister_family, mccallister_phone, mccallister_house, alarm_clocks, house_power, wet_bandits, murphy_house
 
 ## SCENE 9
 INT. MCCALLISTER HOUSE, KITCHEN - EVENING. Kevin, home alone, picks up the
@@ -15,7 +16,7 @@ planning to break into his house at nine o'clock. He decides to defend his
 home, sketches a battle plan, and rigs the house with traps — a blowtorch over
 the back door, a hot doorknob, tar on the basement stairs, paint cans on the
 staircase.
-@expect requires kevin | location | home_alone
+@expect requires kevin | location | mccallister_house
 @expect establishes kevin | knowledge | bandits_plan
 @expect establishes mccallister_house | status | trapped
 
@@ -38,5 +39,5 @@ INT. MCCALLISTER HOUSE - CHRISTMAS MORNING. Kate finally makes it home in the
 back of a polka band's box truck. The rest of the family arrives minutes
 later, straight from the airport. Kevin greets them; he never tells anyone
 what happened.
-@expect establishes kate | location | home
-@expect establishes mccallister_family | location | home
+@expect establishes kate | location | mccallister_house
+@expect establishes mccallister_family | location | mccallister_house

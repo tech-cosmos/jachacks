@@ -14,9 +14,22 @@ Usage:
 
 import sys;
 import os;
+import time;
+import litellm;
 import from byllm.llm { Model }
 
-glob llm = Model(model_name=os.environ.get("CW_MODEL", "gemini/gemini-2.5-flash"));
+def pick_model() -> str {
+    m = os.environ.get("CW_MODEL", "");
+    if m != "" {
+        return m;
+    }
+    if os.environ.get("OPENROUTER_API_KEY", "") != "" {
+        return "openrouter/anthropic/claude-sonnet-5";
+    }
+    return "gemini/gemini-2.5-flash";
+}
+
+glob llm = Model(model_name=pick_model());
 
 # ---------------------------------------------------------------- typed facts
 
@@ -45,32 +58,57 @@ back, someone moves, dies, learns something, gains or loses possession of
 something, or a rule of the story world is stated).
 
 requires: facts that must ALREADY be true for this scene's action to be
-physically possible. Only load-bearing preconditions — not trivia, not mood.
+physically possible — its load-bearing preconditions. When a character
+successfully USES a device, service, or arrangement on screen, you MUST emit a
+requires fact that it is in working/available state (making a call requires
+the phone working; springing a trap requires the trap set). When action
+depends on where someone is or what they know, emit that too. Most scenes
+have 1-2 requires. Exceptions: do not emit a requires fact that this same
+scene itself creates or destroys — a scene where the phone line is torn down
+does not "require" the phone working. Only emit a location requirement if the
+action depends on someone already being in that place when the scene STARTS,
+never for where they end up.
 
 Rules:
-- subject: canonical snake_case id of the entity or system, e.g.
-  "mccallister_phone", "kevin". You MUST reuse an id from known_subjects when
-  the scene refers to the same thing, even if worded differently.
+- subject: canonical snake_case id of the plain entity or system, e.g.
+  "mccallister_phone" (not "mccallister_phone_service"), "kevin". You MUST
+  reuse an id from known_subjects when the scene refers to the same thing,
+  even if worded differently.
 - predicate: one lowercase word such as status / location / possession /
   alive / knowledge / plan. Reuse from known_predicates when it is the same
   kind of claim.
-- value: short lowercase snake_case phrase. For whether a device or service
-  works, use exactly "working" or "down".
+- value: SHORT — one or two lowercase words joined by underscore
+  ("paris_trip", not "christmas_trip_to_paris"). For whether a device or
+  service works, use exactly "working" or "down".
 - Only objectively checkable states. No opinions, themes, or predictions.
 - Return 2-6 establishes and 0-3 requires; only the load-bearing ones.
 """
 def extract_facts(scene: str, known_subjects: list[str],
                   known_predicates: list[str]) -> SceneFacts by llm();
 
-"""You are auditing a screenplay for continuity errors. A scene REQUIRES the
-given fact, but the accumulated canon timeline below shows a mismatching
-state. Decide if this is a genuine, PROVABLE state contradiction: the required
-state is impossible given canon, and no plausible ordinary off-screen
-transition could reconcile it. If any fact in the timeline makes the
-requirement satisfiable (e.g. a partial outage that leaves this use working),
-or a mundane unstated transition plausibly fixes it, it is NOT a
-contradiction. Be strict: is_contradiction=true only when canon truly forbids
-the required state. confidence is one of high / medium / low."""
+"""You are adjudicating a candidate continuity error in one continuous story.
+The canon timeline lists, in story order, every state the script ever
+established for the relevant subjects. The requirement comes from a later
+scene that needs a specific state to be true.
+
+Rules of adjudication:
+- The story world changes ONLY when a scene establishes the change. If the
+  latest canon state contradicts the requirement and NO fact in the timeline
+  establishes a reconciling change, that IS a contradiction. Do not invent
+  off-screen repairs, resets, or passage-of-time fixes, no matter how mundane
+  or plausible — an unwritten fix is exactly what a continuity error is.
+- It is NOT a contradiction if a fact in the timeline itself makes the
+  requirement satisfiable (e.g. a partial outage that explicitly leaves the
+  required kind of use working).
+- It is NOT a contradiction if the mismatch is pure wording — both values
+  describe the same real state (e.g. broken vs down, home vs house).
+- Characters and movable things relocate under their own or others' agency
+  without needing a scene to show it: a LOCATION mismatch is only a
+  contradiction if canon makes the move impossible (dead, imprisoned,
+  destroyed). By contrast, device/service/system states (working vs down),
+  life status, and established world rules change ONLY via an establishing
+  scene — someone must be shown fixing, breaking, or revoking them.
+confidence is one of high / medium / low."""
 def adjudicate(requirement: str, canon_timeline: str,
                scene_excerpt: str) -> Verdict by llm();
 
@@ -186,6 +224,68 @@ def timeline_for(subject: str, states: list) -> str {
     return "\n".join(lines);
 }
 
+def fuzzy(a: str, b: str) -> bool {
+    if norm(a) == norm(b) {
+        return True;
+    }
+    ta = set(norm(a).split("_"));
+    tb = set(norm(b).split("_"));
+    inter = len(ta.intersection(tb));
+    if inter == 0 {
+        return False;
+    }
+    return inter >= 2 or inter == min(len(ta), len(tb));
+}
+
+def share_token(a: str, b: str) -> bool {
+    ta = set(norm(a).split("_"));
+    tb = set(norm(b).split("_"));
+    return len(ta.intersection(tb)) >= 1;
+}
+
+def fact_match(e: Fact, g: Fact) -> bool {
+    return share_token(e.subject, g.subject)
+        and norm(e.predicate) == norm(g.predicate)
+        and fuzzy(e.value, g.value);
+}
+
+def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
+    delay = float(os.environ.get("CW_DELAY", "0"));
+    if delay > 0 {
+        time.sleep(delay);
+    }
+    attempt = 0;
+    while attempt < 3 {
+        try {
+            return extract_facts(prose, ks, kp);
+        } except Exception as e {
+            attempt += 1;
+            print(f"      ! extraction error, attempt {attempt}: {str(e)[:100]}");
+            time.sleep(15.0 * attempt);
+        }
+    }
+    return SceneFacts(establishes=[], requires=[]);
+}
+
+def safe_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
+    delay = float(os.environ.get("CW_DELAY", "0"));
+    if delay > 0 {
+        time.sleep(delay);
+    }
+    attempt = 0;
+    while attempt < 3 {
+        try {
+            return adjudicate(requirement, tl, excerpt);
+        } except Exception as e {
+            attempt += 1;
+            print(f"  ! adjudication error, attempt {attempt}: {str(e)[:100]}");
+            time.sleep(15.0 * attempt);
+        }
+    }
+    return Verdict(is_contradiction=True, confidence="unadjudicated",
+                   reasoning="exact-match mismatch; adjudicator unavailable");
+}
+
 def to_order(tag: str, fallback: float) -> float {
     t = tag.strip();
     if t.replace(".", "", 1).isdigit() {
@@ -207,6 +307,7 @@ obj ScriptData {
     has title: str;
     has kind: str;
     has scenes: list;
+    has vocab: list;
 }
 
 def parse_script(path: str) -> ScriptData {
@@ -215,12 +316,15 @@ def parse_script(path: str) -> ScriptData {
     f.close();
     title = path;
     kind = "script";
+    vocab = [];
     for raw in text.split("\n") {
         line = raw.strip();
         if line.startswith("# TITLE:") {
             title = line[8:].strip();
         } elif line.startswith("# KIND:") {
             kind = line[7:].strip();
+        } elif line.startswith("# VOCAB:") {
+            vocab = [norm(v) for v in line[8:].split(",") if v.strip() != ""];
         }
     }
 
@@ -250,7 +354,8 @@ def parse_script(path: str) -> ScriptData {
                         }
                     }
                 }
-            } elif line.startswith("# TITLE:") or line.startswith("# KIND:") {
+            } elif line.startswith("# TITLE:") or line.startswith("# KIND:")
+                or line.startswith("# VOCAB:") {
                 continue;
             } else {
                 prose_lines.append(raw);
@@ -259,7 +364,7 @@ def parse_script(path: str) -> ScriptData {
         scenes.append(SceneData(order=order, prose="\n".join(prose_lines).strip(),
                                 exp_est=est, exp_req=req));
     }
-    return ScriptData(title=title, kind=kind, scenes=scenes);
+    return ScriptData(title=title, kind=kind, scenes=scenes, vocab=vocab);
 }
 
 # ------------------------------------------------------------------- walkers
@@ -288,8 +393,10 @@ walker Ingest {
         no_llm = os.environ.get("CW_NO_LLM", "") == "1";
         existing_orders = [s.order for s in [doc -->[?:Segment]]];
         states = all_established();
-        known_subj = sorted(set([st.subject for st in states]));
-        known_pred = sorted(set([st.predicate for st in states]));
+        known_subj = sorted(set([st.subject for st in states] + script.vocab));
+        known_pred = sorted(set([st.predicate for st in states]
+                                + ["status", "location", "possession", "alive",
+                                   "knowledge", "plan"]));
 
         for sc in script.scenes {
             if sc.order in existing_orders {
@@ -301,10 +408,17 @@ walker Ingest {
                 print(f"  scene {fmt_scene(sc.order)}: structured mode "
                       f"({len(sc.exp_est)} est, {len(sc.exp_req)} req)");
             } else {
-                facts = extract_facts(sc.prose, sorted(set(known_subj)),
-                                      sorted(set(known_pred)));
-                print(f"  scene {fmt_scene(sc.order)}: extracted "
-                      f"{len(facts.establishes)} est, {len(facts.requires)} req");
+                facts = safe_extract(sc.prose, sorted(set(known_subj)),
+                                     sorted(set(known_pred)));
+                if len(facts.establishes) == 0 and len(facts.requires) == 0
+                    and len(sc.exp_est) + len(sc.exp_req) > 0 {
+                    facts = SceneFacts(establishes=sc.exp_est, requires=sc.exp_req);
+                    print(f"  scene {fmt_scene(sc.order)}: extraction failed, "
+                          f"using annotated facts");
+                } else {
+                    print(f"  scene {fmt_scene(sc.order)}: extracted "
+                          f"{len(facts.establishes)} est, {len(facts.requires)} req");
+                }
             }
 
             seg = Segment(order=sc.order, doc_index=doc.doc_index, prose=sc.prose);
@@ -348,9 +462,7 @@ walker Ingest {
                 matched = 0;
                 for e in expected {
                     for g in got {
-                        if norm(e.subject) == norm(g.subject)
-                            and norm(e.predicate) == norm(g.predicate)
-                            and norm(e.value) == norm(g.value) {
+                        if fact_match(e, g) {
                             matched += 1;
                             break;
                         }
@@ -414,8 +526,10 @@ walker Auditor {
                     confidence = "";
                     reasoning = "exact-match mismatch (LLM adjudication off)";
                 } else {
-                    verdict = adjudicate(requirement, tl, seg.prose[:400]);
-                    if verdict.is_contradiction {
+                    verdict = safe_adjudicate(requirement, tl, seg.prose[:400]);
+                    if verdict.confidence == "unadjudicated" {
+                        status = "candidate";
+                    } elif verdict.is_contradiction {
                         status = "confirmed";
                     } else {
                         status = "declined";
@@ -550,6 +664,7 @@ walker Reset {
 # --------------------------------------------------------------------- entry
 
 with entry {
+    litellm.suppress_debug_info = True;
     argv = sys.argv;
     cmd = "help";
     if len(argv) > 1 {
