@@ -103,8 +103,20 @@ amends, paste (or attach) the amendment, hit FILE & TEST CONSISTENCY — the
 whole canon re-audits immediately and you get a CONSISTENT / INCONSISTENT
 stamp with the newly confirmed and newly withdrawn findings. The pre-built
 corpus is `data/contract_*.txt`; a fully adjudicated snapshot ships as
-`canon_contracts.json` (`jac run main.jac import canon_contracts.json` into
-an empty canon — zero LLM calls).
+`canon_contracts.json`.
+
+Movies and contracts coexist in one canon: `import` **merges** (snapshots
+remap around existing documents, duplicate titles are skipped), so
+
+```sh
+jac run main.jac import canon_share.json       # the movie corpus
+jac run main.jac import canon_contracts.json   # + the contract corpus
+```
+
+loads both with zero LLM calls and no reset. `# CANON:` scopes keep the
+audits isolated, and the **canon lens** dropdown on the graph filters the
+view to one story world / contract at a time — switching is instant and
+purely client-side.
 
 **Real documents:** `.docx` and `.pdf` files ingest directly (`pip install
 pypdf` for PDFs; scanned image-only PDFs won't work) — `Scene N:` headings

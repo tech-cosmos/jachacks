@@ -1030,13 +1030,15 @@ def build_graph_payload() -> dict {
     i = 0;
     for d in all_documents() {
         nodes.append({"data": {"id": f"d{d.doc_index}", "label": d.title,
-                               "type": "document"}});
+                               "type": "document",
+                               "canon": canon_of(d.doc_index)}});
     }
     for seg in all_segments() {
+        seg_canon = canon_of(seg.doc_index);
         segid = f"d{seg.doc_index}s{seg.order}";
         nodes.append({"data": {"id": segid,
                                "label": f"scene {fmt_scene(seg.order)}",
-                               "type": "segment"}});
+                               "type": "segment", "canon": seg_canon}});
         edges.append({"data": {"source": f"d{seg.doc_index}",
                                "target": segid, "kind": "contains"}});
         for st in [seg ->:Establishes:->] {
@@ -1045,7 +1047,7 @@ def build_graph_payload() -> dict {
             sid[id(st)] = stid;
             nodes.append({"data": {"id": stid,
                 "label": f"{st.subject}.{st.predicate} = {st.value}",
-                "type": "state"}});
+                "type": "state", "canon": seg_canon}});
             edges.append({"data": {"source": segid, "target": stid,
                                    "kind": "establishes"}});
         }
@@ -1054,7 +1056,7 @@ def build_graph_payload() -> dict {
             stid = f"rq{i}";
             nodes.append({"data": {"id": stid,
                 "label": f"{st.subject}.{st.predicate} = {st.value}",
-                "type": "requires"}});
+                "type": "requires", "canon": seg_canon}});
             edges.append({"data": {"source": segid, "target": stid,
                                    "kind": "requires"}});
         }
@@ -1077,7 +1079,8 @@ def build_graph_payload() -> dict {
         vkey = f"{v.subject}|{v.predicate}|{v.req_doc}|{v.req_seg}";
         nodes.append({"data": {"id": vid,
             "label": f"{v.subject}.{v.predicate}: {v.required_value} vs {v.found_value}",
-            "type": "violation", "status": v.status, "vkey": vkey}});
+            "type": "violation", "status": v.status, "vkey": vkey,
+            "canon": canon_of(v.req_doc)}});
         edges.append({"data": {"source": f"d{v.req_doc}s{v.req_seg}",
                                "target": vid, "kind": "flags"}});
         viols.append({"subject": v.subject, "predicate": v.predicate,
@@ -1085,7 +1088,7 @@ def build_graph_payload() -> dict {
                       "at": f"{doc_title(v.req_doc)} — scene {fmt_scene(v.req_seg)}",
                       "status": v.status, "confidence": v.confidence,
                       "timeline": v.timeline, "reasoning": v.reasoning,
-                      "key": vkey});
+                      "key": vkey, "canon": canon_of(v.req_doc)});
     }
     return {"elements": {"nodes": nodes, "edges": edges},
             "violations": viols};
@@ -1174,13 +1177,28 @@ def do_import(path: str) {
     f = open(path, "r");
     data = json.loads(f.read());
     f.close();
-    if len(all_documents()) > 0 {
-        print("canon is not empty — run reset first to import a snapshot.");
-        return;
+    # merges into the existing canon: snapshot doc indices are remapped past
+    # the current ones, documents whose title is already present are skipped
+    existing_titles = [d.title for d in all_documents()];
+    next_index = 0;
+    for d in all_documents() {
+        if d.doc_index >= next_index {
+            next_index = d.doc_index + 1;
+        }
     }
+    remap = {};
+    new_state_ids = [];
+    n_docs = 0;
     for dd in data.get("documents", []) {
+        if dd["title"] in existing_titles {
+            print(f"= document {dd['title']} already in canon — skipping");
+            continue;
+        }
         doc = Document(title=dd["title"], kind=dd["kind"],
-                       doc_index=dd["doc_index"], canon=dd.get("canon", ""));
+                       doc_index=next_index, canon=dd.get("canon", ""));
+        remap[dd["doc_index"]] = next_index;
+        next_index += 1;
+        n_docs += 1;
         root ++> doc;
         for sd in dd["segments"] {
             seg = Segment(order=sd["order"], doc_index=doc.doc_index,
@@ -1193,6 +1211,7 @@ def do_import(path: str) {
                            value=fc["value"], doc_index=doc.doc_index,
                            seg_order=seg.order);
                 seg +>:Establishes:+> st;
+                new_state_ids.append(id(st));
             }
             for fc in sd["requires"] {
                 st = State(subject=fc["subject"], predicate=fc["predicate"],
@@ -1203,8 +1222,13 @@ def do_import(path: str) {
         }
         print(f"+ document [{doc.doc_index}] {doc.title}");
     }
+    # transition edges only onto newly imported states, so a merge never
+    # duplicates edges between states that were already linked
     states = all_established();
     for i in range(len(states)) {
+        if id(states[i]) not in new_state_ids {
+            continue;
+        }
         prev = None;
         for j in range(i) {
             if states[j].subject == states[i].subject
@@ -1217,18 +1241,22 @@ def do_import(path: str) {
             states[i] +>:Supersedes:+> prev;
         }
     }
+    n_viols = 0;
     for vd in data.get("violations", []) {
+        if vd["req_doc"] not in remap {
+            continue;
+        }
         root ++> Violation(subject=vd["subject"], predicate=vd["predicate"],
                            required_value=vd["required_value"],
                            found_value=vd["found_value"],
-                           req_doc=vd["req_doc"], req_seg=vd["req_seg"],
+                           req_doc=remap[vd["req_doc"]], req_seg=vd["req_seg"],
                            timeline=vd["timeline"], status=vd["status"],
                            confidence=vd.get("confidence", ""),
                            reasoning=vd.get("reasoning", ""));
+        n_viols += 1;
     }
-    print(f"imported {len(data.get('documents', []))} documents, "
-          f"{len(data.get('violations', []))} cached verdicts. "
-          f"No LLM calls needed.");
+    print(f"imported {n_docs} documents, {n_viols} cached verdicts "
+          f"(merged into existing canon). No LLM calls needed.");
 }
 
 # ----------------------------------------------------------------- http api

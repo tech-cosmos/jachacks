@@ -201,8 +201,15 @@
   #legend {
     position: absolute; top: 14px; left: 18px; right: 14px; z-index: 5;
     display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 10px;
-    color: #8b95a3; letter-spacing: .06em;
+    color: #8b95a3; letter-spacing: .06em; align-items: center;
   }
+  .scopesel {
+    margin-left: auto; font: 10.5px "Courier Prime", monospace;
+    letter-spacing: .08em; background: var(--stage-2); color: #cfd6df;
+    border: 1.5px solid #3a4250; border-radius: 2px; padding: 4px 8px;
+    cursor: pointer; max-width: 220px;
+  }
+  .scopesel:hover { border-color: #6b7686; }
   #legend i {
     display: inline-block; width: 8px; height: 8px; border-radius: 50%;
     margin-right: 5px; vertical-align: baseline;
@@ -406,6 +413,9 @@ healed ones are WITHDRAWN."></textarea>
       <span><i style="background:#5d84c4"></i>established state</span>
       <span><i style="background:#8d76c9"></i>required state</span>
       <span><i style="background:#c22f24"></i>violation</span>
+      <select id="scope" class="scopesel" title="show one story world / contract canon">
+        <option value="">🔍 all canons</option>
+      </select>
     </div>
     <div id="cy"></div>
     <div class="cap">CANON GRAPH — PERSISTED ACROSS EPISODES BY JAC</div>
@@ -546,11 +556,49 @@ function renderGraph(data) {
   }
 }
 
+/* ---------- canon lens: filter the view without touching the canon ---------- */
+let lastData = null, lastScore = null;
+
+function prettyCanon(c) {
+  return c.replace(/_/g, ' ').replace(/\s*\(\d{4}\)$/, '');
+}
+
+function updateScopeOptions() {
+  const sel = $('scope'), had = sel.value;
+  const canons = [...new Set((lastData?.elements.nodes || [])
+    .map(n => n.data.canon).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">🔍 all canons</option>' +
+    canons.map(c => `<option value="${c}">${prettyCanon(c)}</option>`).join('');
+  if (had && canons.includes(had)) sel.value = had;
+}
+
+function filteredView() {
+  const scope = $('scope').value;
+  if (!lastData) return { elements: { nodes: [], edges: [] }, violations: [] };
+  if (!scope) return lastData;
+  const nodes = lastData.elements.nodes.filter(n => n.data.canon === scope);
+  const ids = new Set(nodes.map(n => n.data.id));
+  const edges = lastData.elements.edges.filter(
+    e => ids.has(e.data.source) && ids.has(e.data.target));
+  return { elements: { nodes, edges },
+           violations: (lastData.violations || []).filter(v => v.canon === scope) };
+}
+
+function renderView(score) {
+  const view = filteredView();
+  lastVs = view.violations || [];
+  renderGraph(view);
+  renderCards(view.violations || []);
+  tally(view.violations || [], score);
+}
+
+$('scope').onchange = () => renderView(lastScore);
+
 function applyGraph(data, score) {
-  lastVs = data.violations || [];
-  renderGraph(data);
-  renderCards(data.violations || []);
-  tally(data.violations || [], score);
+  lastData = data;
+  if (score) lastScore = score;
+  updateScopeOptions();
+  renderView(score || lastScore);
 }
 
 async function refresh(score) {
@@ -648,6 +696,11 @@ $('amendgo').onclick = async () => {
       amendVerdict(out);
       await refresh(out.score);
       await loadDocs();
+      const touched = (out.introduced || []).concat(out.withdrawn || [])[0];
+      if ($('scope').value && touched?.canon && $('scope').value !== touched.canon) {
+        $('scope').value = touched.canon;
+        renderView(lastScore);
+      }
     }
   } catch (e) { logLine('✕ server unreachable: ' + e.message, 'walking'); }
   $('amendgo').disabled = false; $('amendgo').classList.remove('busy');

@@ -43,8 +43,8 @@ case "$1" in
     ;;
   contracts)
     # the "not just movies" beat: MSA + 2 amendments -> 2 CONFIRMED
-    # drafting inconsistencies (or: jac run main.jac import canon_contracts.json
-    # into an empty canon for the zero-LLM-call version)
+    # drafting inconsistencies (zero-LLM-call version: jac run main.jac
+    # import canon_contracts.json — import merges into the existing canon)
     $J run main.jac ingest data/contract_msa.txt
     $J run main.jac ingest data/contract_amendment_1.txt
     $J run main.jac ingest data/contract_amendment_2.txt
