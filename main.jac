@@ -939,16 +939,18 @@ def build_graph_payload() -> dict {
     for v in [root -->[?:Violation]] {
         i += 1;
         vid = f"v{i}";
+        vkey = f"{v.subject}|{v.predicate}|{v.req_doc}|{v.req_seg}";
         nodes.append({"data": {"id": vid,
             "label": f"{v.subject}.{v.predicate}: {v.required_value} vs {v.found_value}",
-            "type": "violation", "status": v.status}});
+            "type": "violation", "status": v.status, "vkey": vkey}});
         edges.append({"data": {"source": f"d{v.req_doc}s{v.req_seg}",
                                "target": vid, "kind": "flags"}});
         viols.append({"subject": v.subject, "predicate": v.predicate,
                       "required": v.required_value, "found": v.found_value,
                       "at": f"{doc_title(v.req_doc)} — scene {fmt_scene(v.req_seg)}",
                       "status": v.status, "confidence": v.confidence,
-                      "timeline": v.timeline, "reasoning": v.reasoning});
+                      "timeline": v.timeline, "reasoning": v.reasoning,
+                      "key": vkey});
     }
     return {"elements": {"nodes": nodes, "edges": edges},
             "violations": viols};

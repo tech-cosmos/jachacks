@@ -1532,7 +1532,8 @@
      "id": "v177",
      "label": "mccallister_house.status: intact vs empty",
      "type": "violation",
-     "status": "declined"
+     "status": "declined",
+     "vkey": "mccallister_house|status|1|10.0"
     }
    },
    {
@@ -1540,7 +1541,8 @@
      "id": "v178",
      "label": "camera.status: working vs down",
      "type": "violation",
-     "status": "confirmed"
+     "status": "confirmed",
+     "vkey": "camera|status|6|9.0"
     }
    },
    {
@@ -1548,7 +1550,8 @@
      "id": "v179",
      "label": "mccallister_phone.status: working vs down",
      "type": "violation",
-     "status": "confirmed"
+     "status": "confirmed",
+     "vkey": "mccallister_phone|status|1|9.0"
     }
    },
    {
@@ -1556,7 +1559,8 @@
      "id": "v180",
      "label": "sam.location: tricentennial vs roller_coaster",
      "type": "violation",
-     "status": "declined"
+     "status": "declined",
+     "vkey": "sam|location|6|15.0"
     }
    },
    {
@@ -1564,7 +1568,8 @@
      "id": "v181",
      "label": "kevin.location: mccallister_house vs grocery_store",
      "type": "violation",
-     "status": "declined"
+     "status": "declined",
+     "vkey": "kevin|location|1|11.0"
     }
    },
    {
@@ -1572,7 +1577,8 @@
      "id": "v182",
      "label": "dothraki_horde.alive: true vs dead",
      "type": "violation",
-     "status": "confirmed"
+     "status": "confirmed",
+     "vkey": "dothraki_horde|alive|3|2.0"
     }
    },
    {
@@ -1580,7 +1586,8 @@
      "id": "v183",
      "label": "kevin.location: mccallister_house vs grocery_store",
      "type": "violation",
-     "status": "declined"
+     "status": "declined",
+     "vkey": "kevin|location|1|9.0"
     }
    }
   ],
@@ -3536,7 +3543,8 @@
    "status": "declined",
    "confidence": "medium",
    "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 6] mccallister_house status = empty\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] mccallister_house status = traps_set",
-   "reasoning": "The requirement asks that the house be structurally 'intact' at scene 10, and the scene itself is the one where Kevin sets up the traps (blowtorch, hot doorknob, tar, paint cans). Setting traps does not damage the house's structure \u2014 it remains intact even as traps are being placed; the traps only cause damage later when Harry and Marv trigger them. 'traps_set' is a status about defensive preparations, not about structural damage, so it does not contradict 'intact'. No canon event before or at scene 10 shows the house being destroyed or rendered non-intact, so the requirement is satisfiable given the established facts."
+   "reasoning": "The requirement asks that the house be structurally 'intact' at scene 10, and the scene itself is the one where Kevin sets up the traps (blowtorch, hot doorknob, tar, paint cans). Setting traps does not damage the house's structure \u2014 it remains intact even as traps are being placed; the traps only cause damage later when Harry and Marv trigger them. 'traps_set' is a status about defensive preparations, not about structural damage, so it does not contradict 'intact'. No canon event before or at scene 10 shows the house being destroyed or rendered non-intact, so the requirement is satisfiable given the established facts.",
+   "key": "mccallister_house|status|1|10.0"
   },
   {
    "subject": "camera",
@@ -3547,7 +3555,8 @@
    "status": "confirmed",
    "confidence": "high",
    "timeline": "  [Final Destination 3 (2006) \u2014 scene 7] camera status = down\n  [Final Destination 3 (2006) \u2014 scene 9] camera possession = kevin",
-   "reasoning": "Canon establishes the camera as 'down' in scene 7, and no subsequent scene shows it being repaired. Scene 9 only notes a change in possession (to Kevin), not a fix to its working state. Device/system states require an explicit establishing scene to change, so the requirement that the camera be 'working' in scene 9 contradicts the last established state of 'down'."
+   "reasoning": "Canon establishes the camera as 'down' in scene 7, and no subsequent scene shows it being repaired. Scene 9 only notes a change in possession (to Kevin), not a fix to its working state. Device/system states require an explicit establishing scene to change, so the requirement that the camera be 'working' in scene 9 contradicts the last established state of 'down'.",
+   "key": "camera|status|6|9.0"
   },
   {
    "subject": "mccallister_phone",
@@ -3558,7 +3567,8 @@
    "status": "confirmed",
    "confidence": "high",
    "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 2] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 5] mccallister_phone status = down\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 8] mccallister_phone status = down",
-   "reasoning": "The canon timeline consistently establishes mccallister_phone status = down across Part 1 scenes 2, 5, and 8, with no scene showing a repair or restoration of phone service. Scene 9 of Part 2 requires the phone to be working (Kevin uses it to order pizza), but no establishing event in the timeline reconciles this change from down to working. Per the rules, device/service states change only via an explicit establishing scene, and none exists here, so this is a contradiction."
+   "reasoning": "The canon timeline consistently establishes mccallister_phone status = down across Part 1 scenes 2, 5, and 8, with no scene showing a repair or restoration of phone service. Scene 9 of Part 2 requires the phone to be working (Kevin uses it to order pizza), but no establishing event in the timeline reconciles this change from down to working. Per the rules, device/service states change only via an explicit establishing scene, and none exists here, so this is a contradiction.",
+   "key": "mccallister_phone|status|1|9.0"
   },
   {
    "subject": "sam",
@@ -3569,7 +3579,8 @@
    "status": "declined",
    "confidence": "rule",
    "timeline": "  [Final Destination 3 (2006) \u2014 scene 2] sam location = arcade\n  [Final Destination 3 (2006) \u2014 scene 3] sam location = front_car\n  [Final Destination 3 (2006) \u2014 scene 4] sam location = roller_coaster",
-   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
+   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change.",
+   "key": "sam|location|6|15.0"
   },
   {
    "subject": "kevin",
@@ -3580,7 +3591,8 @@
    "status": "declined",
    "confidence": "rule",
    "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin location = attic_bedroom\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin status = punished\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin location = attic\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin knowledge = left_behind\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kevin location = unknown\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin location = grocery_store\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = groceries\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin possession = pizza\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin knowledge = burglary_plan\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin plan = defend_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 11] kevin location = murphy_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 12] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin knowledge = home_alone\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin status = safe",
-   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
+   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change.",
+   "key": "kevin|location|1|11.0"
   },
   {
    "subject": "dothraki_horde",
@@ -3591,7 +3603,8 @@
    "status": "confirmed",
    "confidence": "high",
    "timeline": "  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde status = battle_ready\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 1] dothraki_horde possession = flaming_blades\n  [Game of Thrones \u2014 S8E3 \"The Long Night\" \u2014 scene 2] dothraki_horde alive = dead\n  [Game of Thrones \u2014 S8E5 \"The Bells\" \u2014 scene 2] dothraki_horde location = kings_landing",
-   "reasoning": "Canon establishes at S8E3 scene 2 that the dothraki_horde alive = dead, with no later scene reversing this. The requirement for S8E5 scene 2 needs dothraki_horde alive = true, but the latest established state is dead, and no reconciling event (resurrection, retcon, or clarification that only part of the horde died) appears in the timeline. This is a life-status change, which per the rules only changes via an explicit establishing scene, so the death stands and contradicts the later requirement that they be alive and charging into King's Landing."
+   "reasoning": "Canon establishes at S8E3 scene 2 that the dothraki_horde alive = dead, with no later scene reversing this. The requirement for S8E5 scene 2 needs dothraki_horde alive = true, but the latest established state is dead, and no reconciling event (resurrection, retcon, or clarification that only part of the horde died) appears in the timeline. This is a life-status change, which per the rules only changes via an explicit establishing scene, so the death stands and contradicts the later requirement that they be alive and charging into King's Landing.",
+   "key": "dothraki_horde|alive|3|2.0"
   },
   {
    "subject": "kevin",
@@ -3602,7 +3615,8 @@
    "status": "declined",
    "confidence": "rule",
    "timeline": "  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin location = attic_bedroom\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 1] kevin status = punished\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin location = attic\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 3] kevin knowledge = left_behind\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 4] kevin location = unknown\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin location = grocery_store\n  [Home Alone (1990) \u2014 Part 1 \u2014 scene 7] kevin possession = groceries\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 9] kevin possession = pizza\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin knowledge = burglary_plan\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 10] kevin plan = defend_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 11] kevin location = murphy_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 12] kevin location = mccallister_house\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin knowledge = home_alone\n  [Home Alone (1990) \u2014 Part 2 \u2014 scene 13] kevin status = safe",
-   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change."
+   "reasoning": "Location mismatch declined by rule: agents relocate freely between scenes, so movement is always a legal implicit transition. Only device/system/life states need an establishing scene to change.",
+   "key": "kevin|location|1|9.0"
   }
  ]
 }

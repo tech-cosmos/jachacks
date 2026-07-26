@@ -223,6 +223,14 @@
   .why b { font-style: normal; font-size: 9.5px; letter-spacing: .18em;
            color: var(--ink-dim); display: block; }
   .nocase { color: #667082; font-size: 12px; font-style: italic; }
+  .card { cursor: pointer; }
+  .card.flash { animation: flashCard 1.4s ease; }
+  @keyframes flashCard {
+    0%   { outline: 3px solid var(--red); outline-offset: 3px;
+           box-shadow: 0 0 30px rgba(194,47,36,.55), 4px 5px 0 rgba(0,0,0,.4); }
+    100% { outline: 0px solid transparent; outline-offset: 3px;
+           box-shadow: 4px 5px 0 rgba(0,0,0,.4); }
+  }
 
   /* ---- naive modal ---- */
   #shade {
@@ -404,6 +412,9 @@ function renderCards(vs) {
       .map(l => `<li>${l.trim()}</li>`).join('');
     const d = document.createElement('div');
     d.className = `card ${v.status}${isNew ? ' new' : ''}`;
+    d.dataset.vkey = v.key || key;
+    d.title = 'click to locate in the canon graph';
+    d.onclick = () => focusNode(v.key || key);
     d.innerHTML = `
       <div class="stamp">${v.status.toUpperCase()}</div>
       <div class="claim">${v.subject}.${v.predicate} — needs <u>${v.required}</u>,
@@ -415,12 +426,42 @@ function renderCards(vs) {
   }
 }
 
+function focusCard(vkey) {
+  const el = document.querySelector(`.card[data-vkey="${CSS.escape(vkey)}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('flash');
+  void el.offsetWidth;               // restart the animation
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1500);
+}
+
+function focusNode(vkey) {
+  if (!cy) return;
+  const n = cy.nodes(`[vkey = "${vkey}"]`);
+  if (!n.length) return;
+  cy.animate({ center: { eles: n }, zoom: 1.6 }, { duration: 450 });
+  n.animate({ style: { width: 44, height: 44 } }, { duration: 250,
+    complete: () => n.animate({ style: { width: 26, height: 26 } },
+                              { duration: 350 }) });
+}
+
+function wireGraphClicks() {
+  cy.on('tap', 'node[type="violation"]', evt =>
+    focusCard(evt.target.data('vkey') || ''));
+  cy.on('mouseover', 'node[type="violation"]',
+    () => $('cy').style.cursor = 'pointer');
+  cy.on('mouseout', 'node[type="violation"]',
+    () => $('cy').style.cursor = '');
+}
+
 function renderGraph(data) {
   if (!window.cytoscape) return;
   if (!cy) {
     cy = cytoscape({ container: $('cy'), elements: data.elements,
       style: CY_STYLE, layout: { name: 'cose', animate: false, nodeRepulsion: 14000 },
       wheelSensitivity: .2 });
+    wireGraphClicks();
   } else {
     cy.elements().remove();
     cy.add(data.elements);
