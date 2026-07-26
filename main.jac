@@ -19,6 +19,7 @@ import json;
 import re;
 import html;
 import zipfile;
+import subprocess;
 import litellm;
 import from byllm.llm { Model }
 import from http.server { HTTPServer, BaseHTTPRequestHandler }
@@ -274,6 +275,92 @@ def fact_match(e: Fact, g: Fact) -> bool {
         and fuzzy(e.value, g.value);
 }
 
+def backend() -> str {
+    return os.environ.get("CW_BACKEND", "");
+}
+
+def cli_json(prompt: str, model: str) -> dict {
+    r = subprocess.run(["claude", "-p", "--model", model,
+                        "--output-format", "text"],
+                       input=prompt, capture_output=True, text=True,
+                       timeout=240);
+    out = r.stdout.strip();
+    i = out.find("{");
+    j = out.rfind("}");
+    if i < 0 or j <= i {
+        raise ValueError(f"no JSON in claude CLI output: {out[:120]}");
+    }
+    return json.loads(out[i:j + 1]);
+}
+
+def cli_extract(scene: str, ks: list, kp: list) -> SceneFacts {
+    model = os.environ.get("CW_CLI_MODEL", "haiku");
+    prompt = (
+        "Extract concrete STATE facts from this scene of a screenplay.\n\n"
+        "establishes: facts this scene makes true from now on (state set or "
+        "changed: broken/repaired, down/up, moved, died, learned, gained, "
+        "lost, or a stated world rule).\n"
+        "requires: facts that must ALREADY be true for the scene's action to "
+        "be physically possible. If a character successfully USES a device or "
+        "service, you MUST include a requires that it is working. If a group "
+        "acts and their survival could be in doubt, require them alive. Never "
+        "require what this same scene creates or destroys. Location "
+        "requirements only for where someone must be when the scene STARTS.\n\n"
+        "Rules: subject = canonical snake_case entity id — REUSE from "
+        f"known_subjects when the same thing is meant: {ks}\n"
+        f"predicate = one lowercase word, reuse from: {kp}\n"
+        "value = 1-2 lowercase words joined by underscore; use exactly "
+        "working or down for device/service health.\n"
+        "Only objectively checkable states. 2-6 establishes, 0-3 requires.\n\n"
+        "Respond with ONLY this JSON, no prose:\n"
+        "{\"establishes\": [{\"subject\": \"s\", \"predicate\": \"p\", "
+        "\"value\": \"v\"}], \"requires\": [...]}\n\n"
+        f"SCENE:\n{scene}");
+    d = cli_json(prompt, model);
+    est = [Fact(subject=str(x.get("subject", "")),
+                predicate=str(x.get("predicate", "")),
+                value=str(x.get("value", "")))
+           for x in d.get("establishes", []) if x.get("subject")];
+    req = [Fact(subject=str(x.get("subject", "")),
+                predicate=str(x.get("predicate", "")),
+                value=str(x.get("value", "")))
+           for x in d.get("requires", []) if x.get("subject")];
+    return SceneFacts(establishes=est, requires=req);
+}
+
+def cli_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
+    model = os.environ.get("CW_CLI_JUDGE_MODEL", "sonnet");
+    prompt = (
+        "You are adjudicating a candidate continuity error in one continuous "
+        "story. The canon timeline lists every state the script established, "
+        "in story order. Rules: the story world changes ONLY when a scene "
+        "establishes the change — do not invent off-screen repairs or fixes, "
+        "however mundane; an unwritten fix is exactly what a continuity error "
+        "is. NOT a contradiction if a timeline fact makes the requirement "
+        "satisfiable, or the mismatch is pure wording for the same real "
+        "state. Location mismatches are only contradictions if canon makes "
+        "the move impossible; device/service/life states change only via an "
+        "establishing scene.\n\n"
+        f"REQUIREMENT: {requirement}\n\nCANON TIMELINE:\n{tl}\n\n"
+        f"SCENE EXCERPT:\n{excerpt}\n\n"
+        "Respond with ONLY this JSON:\n"
+        "{\"is_contradiction\": true, \"confidence\": "
+        "\"high|medium|low\", \"reasoning\": \"...\"}");
+    d = cli_json(prompt, model);
+    return Verdict(is_contradiction=bool(d.get("is_contradiction", False)),
+                   confidence=str(d.get("confidence", "low")),
+                   reasoning=str(d.get("reasoning", "")));
+}
+
+def cli_naive(script: str) -> list {
+    model = os.environ.get("CW_CLI_JUDGE_MODEL", "sonnet");
+    prompt = ("List the plot holes in this script. Be specific.\n"
+              "Respond with ONLY JSON: {\"holes\": [\"...\", \"...\"]}\n\n"
+              + script);
+    d = cli_json(prompt, model);
+    return [str(h) for h in d.get("holes", [])];
+}
+
 def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
     delay = float(os.environ.get("CW_DELAY", "0"));
     if delay > 0 {
@@ -282,6 +369,9 @@ def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
     attempt = 0;
     while attempt < 3 {
         try {
+            if backend() == "claude" {
+                return cli_extract(prose, ks, kp);
+            }
             return extract_facts(prose, ks, kp);
         } except Exception as e {
             attempt += 1;
@@ -300,6 +390,9 @@ def safe_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
     attempt = 0;
     while attempt < 3 {
         try {
+            if backend() == "claude" {
+                return cli_adjudicate(requirement, tl, excerpt);
+            }
             return adjudicate(requirement, tl, excerpt);
         } except Exception as e {
             attempt += 1;
@@ -880,6 +973,9 @@ def api_naive(body: dict) -> dict {
     }
     if txt.strip() == "" {
         txt = body.get("text", "");
+    }
+    if backend() == "claude" {
+        return {"holes": cli_naive(txt)};
     }
     return {"holes": find_plot_holes(txt)};
 }

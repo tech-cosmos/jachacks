@@ -64,6 +64,10 @@ are recognized, headingless transcripts are auto-chunked, and
 reel. Films that share a story world declare `# CANON: <scope>` so episodes
 and prequels share canon while unrelated films stay isolated.
 
+`CW_BACKEND=claude` routes extraction/adjudication through the `claude` CLI
+(`claude -p`) instead of byllm — runs on a Claude subscription with no API
+key at all (`CW_CLI_MODEL` for extraction, default haiku;
+`CW_CLI_JUDGE_MODEL` for verdicts, default sonnet).
 `CW_NO_LLM=1` runs the graph pipeline on annotated facts only (no API calls).
 `CW_MODEL` overrides the extraction model (default:
 `openrouter/deepseek/deepseek-v4-flash` — ~$0.10 for a 139-scene corpus;
