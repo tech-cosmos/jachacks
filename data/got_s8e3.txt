@@ -1,0 +1,27 @@
+# TITLE: Game of Thrones — S8E3 "The Long Night"
+# KIND: tv episode script
+# VOCAB: dothraki_horde, unsullied, jon_snow, daenerys, arya, night_king, winterfell, army_of_the_dead
+
+## SCENE 1
+EXT. WINTERFELL - NIGHT. The living assemble in battle lines before the
+castle: the full Dothraki horde on horseback at the front, arakhs raised,
+with the Unsullied phalanx and Northern infantry behind them. Melisandre
+rides the line and sets every Dothraki blade alight with a word.
+@expect establishes dothraki_horde | location | winterfell
+@expect establishes dothraki_horde | status | battle_ready
+
+## SCENE 2
+EXT. FIELDS BEFORE WINTERFELL - NIGHT. The Dothraki charge screaming into
+the darkness toward the army of the dead. From the battlements, the distant
+flaming arakhs wink out, rank after rank, until the field goes silent and
+black. A handful of riderless horses gallop back. The Dothraki horde has
+been wiped out in the first minutes of the battle.
+@expect establishes dothraki_horde | status | wiped_out
+
+## SCENE 3
+INT. WINTERFELL, GODSWOOD - NIGHT. As the Night King reaches for Bran, Arya
+leaps from the dark and destroys him with the dagger. Every white walker and
+wight shatters where it stands. The battle for the North is over, won at
+staggering cost to the armies of the living.
+@expect establishes night_king | alive | false
+@expect establishes army_of_the_dead | status | destroyed

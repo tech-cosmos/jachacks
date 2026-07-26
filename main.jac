@@ -61,7 +61,9 @@ requires: facts that must ALREADY be true for this scene's action to be
 physically possible — its load-bearing preconditions. When a character
 successfully USES a device, service, or arrangement on screen, you MUST emit a
 requires fact that it is in working/available state (making a call requires
-the phone working; springing a trap requires the trap set). When action
+the phone working; springing a trap requires the trap set). When a character
+or group fights, marches, or otherwise acts on screen and their survival
+could be in doubt, emit a requires that they are alive / intact. When action
 depends on where someone is or what they know, emit that too. Most scenes
 have 1-2 requires. Exceptions: do not emit a requires fact that this same
 scene itself creates or destroys — a scene where the phone line is torn down

@@ -2,7 +2,7 @@
 # KIND: film script
 # VOCAB: kevin, kate, mccallister_family, mccallister_phone, mccallister_house, alarm_clocks, house_power, wet_bandits, murphy_house
 
-## SCENE 5.5
+## SCENE 8.5
 INT. PARIS AIRPORT - DAY (ADDITIONAL DIALOGUE). The operator clarifies the
 outage for Kate: the storm took down the long-distance trunk lines into
 Kevin's neighborhood only. Local telephone calls placed within the

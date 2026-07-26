@@ -1,0 +1,22 @@
+# TITLE: Game of Thrones — S8E5 "The Bells"
+# KIND: tv episode script
+# VOCAB: dothraki_horde, unsullied, jon_snow, daenerys, drogon, kings_landing, golden_company
+
+## SCENE 1
+INT. DRAGONSTONE - DAY. Daenerys, grieving and furious, plans the assault on
+King's Landing with Grey Worm and Jon: the fleet will hit the Iron Fleet,
+Drogon will burn the scorpions, and her ground forces will storm the gates.
+@expect establishes daenerys | plan | assault_kings_landing
+
+## SCENE 2
+EXT. KING'S LANDING, CITY GATES - DAY. The gates fall. The Dothraki horde,
+thousands of screamers strong, charges on horseback through the breach and
+into the streets, arakhs flashing, cutting down the fleeing remnants of the
+Golden Company alongside the Unsullied advance.
+@expect requires dothraki_horde | status | battle_ready
+
+## SCENE 3
+EXT. KING'S LANDING - DAY. The bells of surrender ring out across the city.
+Daenerys, atop Drogon, hears them — and turns toward the Red Keep, burning
+the city and its people street by street.
+@expect establishes kings_landing | status | burning
