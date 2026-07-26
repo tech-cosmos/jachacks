@@ -1,0 +1,685 @@
+{
+ "ranked": [
+  {
+   "name": "Lazarus",
+   "one_liner": "A durable-execution runtime for LLM agents in ~400 lines of Jac: a Queen planner spawns Worker walkers across a task DAG's frontier, and when you kill -9 the process mid-task the colony resurrects exactly where it died \u2014 because the plan IS the persistent graph.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Task(goal, status), Step(description, tool, status: pending/running/done/failed, attempt_count, result), Artifact(output). Edges: subtask_of, depends_on (forming a DAG), produced. Walkers: Planner (arrives at Task, byLLM-decomposes the goal into Step nodes wired with depends_on edges), Queen (repeatedly finds current frontier \u2014 steps all of whose deps are done \u2014 and SPAWNS Worker walkers on them, walkers-spawning-walkers being strong JacHammer material, absorbed from Leafcutter), Worker ('can execute with Step entry' fires only when upstream deps are done; writes result onto here, which auto-persists), Medic (retries failed steps with the captured error in context; attempt_count lives on the node), Reaper (on startup, resets Steps stuck in 'running' and resumes). Load-bearing: Temporal/Airflow exist precisely because process memory dies; here execution state lives on nodes attached to root, so crash-recovery is literally free.",
+   "byllm_use": "def decompose(goal: str) -> list[StepSpec{description, tool: ToolName(enum: write_file, run_code, calculate, summarize), depends_on_indices}] by llm() \u2014 typed output builds the DAG directly; def execute_step(instruction: str, upstream_results: list[str]) -> StepResult{output, success} by llm(); def diagnose(error: str, instruction: str) -> RetryPatch by llm(); def postmortem(steps: list[str]) -> str by llm().",
+   "autonomy": "Planning (LLM decomposes a goal into a dependency DAG it then executes), memory (every step result persists on the graph and feeds downstream steps \u2014 across process restarts), tool use (each Step typed with a local tool enum), coordination (Queen dispatches Workers on independent DAG branches concurrently; Workers report via node status \u2014 the graph is the coordination substrate, no queue, no DB).",
+   "demo_moment": "Give it a 7-step task; a live graph view shows steps turning green as Workers land. At step 4 the presenter runs kill -9 on stage \u2014 terminal dies, audience gasps. Restart: completed steps are still green and the colony resumes at step 4. Closer: grep the repo for 'db' \u2014 nothing. Zero database code.",
+   "feasibility_notes": "Core engine (walkers + 4 node types) is a few hundred lines; tools are local-only (file write, python eval, calculator) so nothing flaky on stage. Frontend is one HTML page polling the jac start REST API. The Leafcutter code-migration domain was deliberately dropped (too close to past winners GhostWatch/Corpus and too risky live); its Queen/Worker frontier mechanic is kept. Cut order: Medic, concurrency, viz polish (terminal DAG printout fallback). The kill -9 beat needs zero extra code.",
+   "merged_from": [
+    "Lazarus",
+    "Leafcutter"
+   ],
+   "avg_score": 43.0,
+   "axis_avg": {
+    "winnability": 9.0,
+    "jac_nativeness": 10.0,
+    "feasibility": 9.0,
+    "demo_wow": 7.7,
+    "originality": 7.3
+   },
+   "judge_notes": [
+    "Durable agent execution is a real infrastructure market (Temporal-for-agents), the kill -9 beat is bulletproof because it needs zero extra code, and 'the plan IS the persistent graph' is the single best language pitch in the batch.",
+    "The kill -9 beat is deterministic, rehearsable, and needs zero extra code, and 'grep the repo for db' doubles as the Best JacHammer pitch \u2014 the safest high-ceiling entry on the list.",
+    "Persistence-as-durable-execution is the single best argument for Jac's existence, walkers-spawning-walkers on a DAG frontier is deep language use, and the kill -9 beat costs zero extra code \u2014 the strongest JacHammer candidate here."
+   ]
+  },
+  {
+   "name": "Chain of Life",
+   "one_liner": "Forty incompatible donor-patient pairs sit disconnected until a pasted referral email mints one altruistic donor and a walker lights up a six-transplant kidney-swap chain \u2014 then hospital advocates argue over conflicting chains, an ethics-policy arbiter rules, and a donor dropout forces a live rescue replan.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Pair(patient_blood, donor_blood, urgency, wait_time), Hospital, AltruisticDonor, Chain(status). Edges: paired_with (donor to their own incompatible loved one), CompatibleWith(donor->patient of another pair, hla_score) laid down by a CompatibilityWeaver walker, MemberOf(Pair->Hospital), ProposedIn(Pair->Chain). Walkers: ChainSeeker/MatchWalker (DFS along alternating paired_with/CompatibleWith edges hunting 2-3 cycles and altruist-started chains \u2014 the walker's carried state literally IS the candidate chain; this is how UNOS actually frames the problem), AdvocateWalker per hospital (reviews proposed chains touching its patients, drafts cases), ArbiterWalker (selects a disjoint set \u2014 overlapping chains genuinely conflict, so approving one kills another), ExecuteWalker (removes transplanted Pairs; on dropout breaks a chain and re-triggers matching). Unimpeachably load-bearing: a real graph algorithm on the real domain model.",
+   "byllm_use": "def parse_intake(referral_note: str) -> DonorProfile by llm() \u2014 paste a messy doctor's email on stage and a typed node appears in the graph; def plead(chain_summary, my_patients, policy) -> Case{argument, priority_claim} by llm(); def arbitrate(cases: list[Case], policy: str) -> Ruling{approved_chain_ids, rationale} by llm() \u2014 the written ethics policy is shown on screen so judges see the constraint; def explain_chain(hops: list[str]) -> str by llm() for plain-English narration.",
+   "autonomy": "Competing advocates with real conflicts of interest, an arbiter reasoning against an explicit written policy, event-driven replanning on donor dropout, and a persistent registry \u2014 new pairs added between runs just join the graph.",
+   "demo_moment": "40 red disconnected pairs float on screen; the presenter pastes an unstructured referral email, byLLM mints the altruistic donor, ChainSeeker animates hop by hop, and a 6-transplant chain flashes gold with a 'lives saved' counter ticking to 6. Three candidate chains overlap on one donor \u2014 advocates argue, the arbiter approves two with a written rationale \u2014 then 'Donor 7 has withdrawn' shatters a chain mid-animation and the rescue chain lights up node by node across four hospitals, salvaging 4 of the 6.",
+   "feasibility_notes": "14-40 synthetic pairs; blood-type compatibility is a lookup table (skip HLA detail); cycle-finding DFS is ~50 lines of Jac, trivial compute at this scale. Frontend: cytoscape with hospital clusters and animated chain highlighting. Zero external data or APIs beyond the LLM. Cut order: surgery scheduling, altruistic donors, 4 hospitals -> 2, multi-chain optimization (greedy first-found chain is fine).",
+   "merged_from": [
+    "LifeLine",
+    "Chain of Life"
+   ],
+   "avg_score": 41.0,
+   "axis_avg": {
+    "winnability": 8.7,
+    "jac_nativeness": 9.0,
+    "feasibility": 8.0,
+    "demo_wow": 8.7,
+    "originality": 6.7
+   },
+   "judge_notes": [
+    "The real UNOS problem, the real graph algorithm, and a lives-saved counter \u2014 the clearest problem-to-impact story in all 22, with the dropout-rescue beat covering the autonomy criterion too.",
+    "A real graph algorithm on the real UNOS domain with a lives-saved counter is the strongest Social Impact spine here \u2014 just be ready to cut the advocate-vs-arbiter subplot the moment the clock slips.",
+    "A real graph algorithm on the domain that invented it, plus advocates, an ethics arbiter, and a dropout replan with a lives-saved counter \u2014 the most complete package in the batch."
+   ]
+  },
+  {
+   "name": "Walkers & Wyverns",
+   "one_liner": "A dungeon crawler where the dungeon literally is the Jac graph and the adventuring party are literally walkers \u2014 traps and monsters are node abilities that fire on entry \u2014 and killing the process mid-quest proves the party's beliefs, plans, and map survive with zero save-game code.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Room(scene, loot, danger), Trap, Monster(hp, temperament), Campfire (shared party memory), plus agent-authored Belief nodes ('key is probably north') and Goal/Subgoal nodes (from Save Point). Edges: door(direction, locked, hidden), contains, explored(timestamp), suspects, subgoal_of. Walkers: Scout (expendable, explores ahead, writes MapNote nodes), Fighter, Wizard, DungeonMaster (seeds the graph from one typed ThemePlan). The JacHammer trick: game rules ARE object-spatial dispatch \u2014 'can spring with Adventurer entry' on a Trap damages whoever arrives, 'can block with Adventurer entry' on a Monster starts combat. Near-zero engine code; the language's core semantic (abilities firing on walker arrival) is the game loop \u2014 the purest 'depth of Jac utilization' story in the batch.",
+   "byllm_use": "def narrate_room(theme: str, contents: str) -> RoomScene by llm(); def party_council(map_notes: list[str], party_hp: str, goals: list[Goal], beliefs: list[Belief]) -> Plan by llm() \u2014 which walker takes which edge and why, shown as a transcript; def revise_beliefs(observation: str, beliefs: list[Belief]) -> list[Belief] by llm(); def monster_parley(temperament: str, offer: str) -> ParleyOutcome by llm() \u2014 the Wizard talks its way past a troll; def parse_quest(audience_line: str) -> Goal by llm() so the audience names the quest.",
+   "autonomy": "Explicit plan/act loop (council transcript renders before each move), role-specialized multi-agent coordination (Scout finds the trap, Fighter takes the safe route, Wizard parleys), explicit Belief/Goal memory nodes visible on screen, shared memory at Campfire nodes \u2014 and persistence proven live, not asserted.",
+   "demo_moment": "A fogged-out node-link dungeon; three colored walker dots split up; the Scout dies to a trap and the council reads its final MapNote aloud and reroutes; the Wizard talks a troll into unlocking a door edge. Then the mic-drop: Ctrl-C on stage, silence, 'jac run' again \u2014 fog-of-war map, inventory, beliefs, and the half-finished plan all reload from root and the party walks straight to the treasure. 'We just killed its brain and it lost nothing. No database. That is the language.'",
+   "feasibility_notes": "15-room graph, dice-and-stats combat (deterministic \u2014 only narration/council/parley touch the LLM, so pacing is controllable, ~15-25 calls per run). Frontend is one D3/canvas page reading jac-start endpoints. Rehearse the kill/restart beat until bulletproof \u2014 it is deterministic because state is in the graph. Cut order: parley, loot, audience quest-naming (canned quest); trap-as-node-ability plus the restart beat is the demo even if everything else slips.",
+   "merged_from": [
+    "Walkers & Wyverns",
+    "Save Point"
+   ],
+   "avg_score": 39.3,
+   "axis_avg": {
+    "winnability": 6.3,
+    "jac_nativeness": 10.0,
+    "feasibility": 8.0,
+    "demo_wow": 8.0,
+    "originality": 7.0
+   },
+   "judge_notes": [
+    "The purest depth-of-Jac story (game rules as dispatch semantics) and a lock for JacHammer contention, but zero real-world impact caps it in a track judged partly on impact.",
+    "Traps-as-node-abilities is the purest language flex here and a strong JacHammer play, but a game scores near zero on the real-world-impact criterion that is explicitly on the rubric.",
+    "Traps as 'can spring with Adventurer entry' makes the language itself the game engine \u2014 maximal Jac purity \u2014 but near-zero real-world impact caps it below the impact-heavy track winners."
+   ]
+  },
+  {
+   "name": "Domino",
+   "one_liner": "A bank-run sandbox where a judge clicks any bank in a 15-20 bank interbank exposure graph, LLM bank agents panic on local information, contagion cascades edge-by-edge \u2014 then the same shock replays with a regulator agent that finds the cheapest bailout, and it remembers super-spreaders between runs.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Bank(capital, liquid_assets, deposits), Regulator/CentralBank(budget), ScenarioMemory. Edges: lends_to(amount, seniority), deposits_at(amount). Walkers: ShockWalker (enters the failed Bank, applies haircuts along every incoming lends_to edge, recomputes each creditor's capital via 'can absorb_loss with Bank entry', and visits onward only from banks that breach their capital floor \u2014 the cascade IS the traversal frontier), PanicWalker (between rounds, visits every surviving bank so its agent can react; pulled credit lines DELETE edges, fire sales reprice assets, so the next round runs on the mutated graph), BailoutWalker (injects capital at chosen nodes and re-runs ShockWalker in simulate mode). Load-bearing: financial contagion is definitionally edge propagation with per-node state; a walker whose visit-set grows only when a node ability flips it to 'failed' is the exact semantics of the domain. Also a credible Best JacHammer entry.",
+   "byllm_use": "def decide_move(view: BankView) -> BankMove by llm() (enum HOLD | PULL_CREDIT_LINES | FIRE_SALE | RAISE_CAPITAL plus one-line rationale \u2014 each agent sees only its OWN neighbors, so panic is emergent and different every run); def regulator_brief(report: CascadeReport) -> InterventionPlan by llm(); def post_mortem(before, after) -> PressRelease by llm() \u2014 the deadpan Fed statement read aloud as the closing laugh.",
+   "autonomy": "15+ independent bank agents make byLLM decisions from local information, their moves mutate the edge graph, and the next contagion round runs on the mutated graph \u2014 emergent, not scripted. The regulator plans: it calls BailoutWalker in simulate mode as a tool, compares 3 counterfactual interventions, commits the cheapest that halts the cascade. ScenarioMemory nodes persist across runs, so on the second judge-triggered failure the regulator already 'knows' bank_7 is a super-spreader and moves faster \u2014 a stated, visible memory beat.",
+   "demo_moment": "A judge clicks Bank #7; it flips red and failure ripples outward in animated waves while bank rationales stream in a sidebar ('pulling our line to Bank 3, they're overexposed'). Then: 'Now watch it again with the regulator awake.' Same click, the agent injects capital at three chokepoints, and the collapse stalls at ring one. Closing split-screen: uncontained vs contained, bailout cost tally, AI-written press release. Same click, two futures.",
+   "feasibility_notes": "Synthetic network via a 30-line seeding walker; balance-sheet math is subtraction, fully deterministic core with LLM decisions layered on top (if the LLM flakes, HOLD is the fallback and the demo still cascades). Viz is one HTML canvas polling the jac start API. Cut order: fire-sale dynamics, deposit runs (keep lends_to contagion), intervention variety (bailout-only), press release, shrink agents 15 -> 8.",
+   "merged_from": [
+    "Domino (15-bank agent version)",
+    "Domino (60-bank judge-click version)"
+   ],
+   "avg_score": 39.3,
+   "axis_avg": {
+    "winnability": 8.0,
+    "jac_nativeness": 9.0,
+    "feasibility": 8.0,
+    "demo_wow": 8.0,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "'Same click, two futures' is a perfect 4-minute story with a deterministic core that cannot flake, though it remains a policy sandbox rather than something anyone buys.",
+    "Deterministic cascade math with LLM panic layered on top means the demo still works if the model flakes, and 'same click, two futures' is a perfect 4-minute structure.",
+    "A cascade frontier that grows only when a node ability flips a bank to failed is the exact walker semantic, and the deterministic core still demos if every LLM call fails \u2014 the best Fintech entry."
+   ]
+  },
+  {
+   "name": "Patient Zero",
+   "one_liner": "Judges seed a live misinformation outbreak from their phones and watch fact-checker agents race the contagion across a 300-person social graph \u2014 the rumor text mutating telephone-game style at every hop \u2014 until a provenance walker traces it back to 'patient zero: seat 3'.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Person(susceptibility, persona, stance), Claim(text, virality, verdict), Community hubs, ClaimMemory (debunk signatures). Edges: follows(strength), heard(timestamp, mutated_text), debunks, corrects. Walkers: OutbreakWalker carries a Claim across follows edges \u2014 a per-Person entry ability rolls infection from edge strength x susceptibility, so contagion IS traversal, and each hop rewrites the rumor in the receiving persona's voice; Sentinel patrols high-degree hubs to detect anomalous spread; FactChecker traverses heard edges BACKWARDS to locate patient zero (provenance is literally the reverse path), then forward-plants corrections at hub nodes. Load-bearing: spread, provenance, and containment strategy are all pure edge-walking problems.",
+   "byllm_use": "def mutate_claim(claim: str, persona: str) -> MutatedClaim by llm() \u2014 judges watch the text morph live; def adjudicate(claim: str, trusted_facts: list[str]) -> Verdict{label, confidence, correction} by llm(); def craft_prebunk(claim: str, community_profile: str) -> str by llm() for inoculating not-yet-infected hubs; def diff_rumors(original: str, final: str) -> DriftReport by llm() (from Whisper Net) \u2014 narrates how the lie evolved, read aloud at the climax.",
+   "autonomy": "Sentinel plans a patrol route from degree centrality; FactChecker chains tools (graph queries + byLLM adjudication) and persists debunked-claim signatures as ClaimMemory nodes \u2014 reinject the same rumor later in the demo and it gets contained in seconds, a visible on-stage memory payoff. Two walker species operating concurrently reads as multi-agent coordination.",
+   "demo_moment": "QR code goes up; a judge submits any rumor from their phone; its node drops into the graph and spreads in red with the wording visibly mutating hop by hop ('the bakery closes Tuesdays' becomes 'the baker fled town after poisoning the mayor'); FactChecker traces a glowing path backwards to the judge's own node \u2014 'patient zero: seat 3' \u2014 reads its DriftReport aloud, and green corrections ripple outward bending the live infection curve.",
+   "feasibility_notes": "Fully synthetic: generate the 300-node social graph at startup; frontend is one vis.js/cytoscape page polling the jac start REST API twice a second; phone submissions are a single POST endpoint. Split: 1 graph+walkers, 1 byLLM+agents, 1 frontend, 1 demo/data tuning. Cut order: mutate only every 3rd hop to bound LLM calls, drop pre-bunking, QR input -> presenter-typed rumor.",
+   "merged_from": [
+    "Patient Zero",
+    "Whisper Net"
+   ],
+   "avg_score": 39.0,
+   "axis_avg": {
+    "winnability": 8.0,
+    "jac_nativeness": 8.3,
+    "feasibility": 7.3,
+    "demo_wow": 9.0,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "'Patient zero: seat 3' aimed at a judge's own phone is the best audience-participation moment in the batch \u2014 but the deployment story ends when the demo does.",
+    "Tracing the glowing path back to 'patient zero: seat 3' on a judge's own phone submission is the single best demo moment in the list \u2014 keep the presenter-typed fallback rehearsed because live QR input is the one flake vector.",
+    "Tracing a judge's own rumor back to 'patient zero: seat 3' with the text mutating en route is the best single demo beat submitted; the underlying contagion sim is less original than the theater."
+   ]
+  },
+  {
+   "name": "Clausewitz",
+   "one_liner": "A contract graph where defined terms are first-class nodes \u2014 edit one definition and a ripple walker shows every clause across every document whose meaning just silently changed, then drafts the redlines.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Document, Clause(text), DefinedTerm(definition, version), Party, Obligation(amount, deadline). Edges: defines(Clause->DefinedTerm), uses(Clause->DefinedTerm, context_snippet), references(Clause->Clause, cross-document), obligates. Walkers: Parser (splits documents into Clause nodes, wires defines/uses/references edges), RippleWalker (spawned at an edited DefinedTerm; traverses uses edges to every dependent Clause, gets an LLM impact verdict at each, and CONDITIONALLY continues along references edges only when impact is material \u2014 the traversal frontier is decided by LLM judgment at each node, the purest Jac walker+byLLM fusion in this list), Redliner (visits red Clauses and drafts amendments). Load-bearing: cross-document meaning-cascade is impossible to see in flat documents; it only exists as edges.",
+   "byllm_use": "def extract_clauses(doc_text: str) -> list[ClauseOut{clause_id, text, terms_defined, terms_used, cross_refs}] by llm(); def impact(term, old_def, new_def, clause_text) -> ImpactAssessment{materially_changed, explanation, risk} by llm() \u2014 the field that gates the walker's propagation; def draft_redline(clause_text, problem, new_def) -> Amendment by llm().",
+   "autonomy": "Genuinely agentic traversal: the walker decides where to go next based on typed LLM verdicts, carries a growing impact ledger in its state, and hands red nodes to a second Redliner walker \u2014 visible planning, judgment, and two-agent coordination. The parsed graph persists between runs, so re-edits are instant.",
+   "demo_moment": "Four documents on screen (MSA, SLA, Order Form, DPA \u2014 ~40 clauses). Edit the definition of 'Active User' to exclude free-tier accounts. The ripple animates outward: 11 clauses turn amber, 3 turn red \u2014 including the SLA service-credit formula and a pricing tier in a DIFFERENT document \u2014 and the agent explains 'your SLA credits now pay out on a smaller base' with the drafted redline. A cross-document consequence no lawyer would catch by reading.",
+   "feasibility_notes": "Write the 4 synthetic contracts with LLM generation plus hand-tuning so the ripple story is guaranteed (1 person, 90 min). Run Parser before the demo and persist (legitimate thanks to Jac persistence); the live path is only the fast ripple. Cut order: Redliner (show impact explanations only), Obligation/Party nodes, conditional propagation (fixed 2-hop ripple fallback).",
+   "merged_from": [
+    "Clausewitz"
+   ],
+   "avg_score": 38.0,
+   "axis_avg": {
+    "winnability": 7.0,
+    "jac_nativeness": 9.0,
+    "feasibility": 8.0,
+    "demo_wow": 7.0,
+    "originality": 7.0
+   },
+   "judge_notes": [
+    "A genuinely valuable CLM insight (cross-document meaning cascade) with the elegant LLM-gated-traversal mechanic \u2014 the risk is a judging panel that doesn't feel contract pain in its spine.",
+    "The LLM-verdict-gated traversal frontier is the most elegant walker+byLLM fusion in the list and pre-parsing via persistence makes the live path nearly risk-free, but the ripple is a quieter wow than the cascade demos.",
+    "A typed LLM impact verdict gating the walker's traversal frontier is precisely the byLLM+OSP fusion the language was designed for \u2014 quietly the deepest single pattern in the list, with a legible cross-document payoff."
+   ]
+  },
+  {
+   "name": "Retcon",
+   "one_liner": "A live writers' room where character agents with secret goals grow a story whose facts and who-knows-what live as a graph: the audience shouts a plot twist, continuity walkers flare every scene the twist breaks, and a repair agent rewrites exactly those scenes until the graph goes green.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Character(persona, secret_goal, alive/dead), Scene(text, story_time, tension), Location, Fact(subject, predicate, object), PlotThread. Edges: LeadsTo (branching scene order), appears_in, Knows(Character->Fact, since_scene \u2014 dramatic irony as a queryable edge, from WritersRoom), asserts(Scene->Fact), contradicts, repaired_by. Walkers: CharacterWalker per character pitches next scenes advancing its hidden agenda, constrained by its Knows edges; FactMiner wires asserts/knows edges from byLLM-extracted facts; ContinuityWalker traverses only the relevant character's knows/asserts subgraph so the graph pre-filters candidate contradictions and the LLM only judges plausible pairs; DirectorWalker scores branch tension arcs and deletes the weakest subgraph on camera; Repairman walks contradicts edges computing the minimal rewrite set. Say it to judges: the graph does the search, the LLM does the judgment.",
+   "byllm_use": "def propose_scene(persona, secret_goal, story_so_far, my_known_facts) -> ScenePitch by llm(); def extract_facts(scene_text: str) -> list[Fact{subject, predicate, object, confidence}] by llm(); def check_conflict(a: Fact, b: Fact) -> Conflict{is_conflict, severity, explanation} by llm(); def rewrite_scene(scene: str, constraints: list[Fact]) -> str by llm().",
+   "autonomy": "Agents with hidden agendas producing emergent plot, constrained by graph state (a character cannot use a fact it has no Knows edge to \u2014 memory as edges, not prompt hygiene); the Repairman runs a visible plan/act/verify loop, re-running FactMiner as verification until zero contradictions; the story world persists between runs.",
+   "demo_moment": "A 12-scene noir lives on screen as a glowing graph. Audience shouts a twist \u2014 'the detective has been blind since chapter one' \u2014 and within seconds five scene nodes flare red with reasons ('scene 4: he reads the ransom note'); Repairman rewrites them one by one, red flipping green next to a before/after diff, and the Director executes a weak branch on camera before the narrator reads the coherent ending aloud.",
+   "feasibility_notes": "Pre-generate and persist the 12-scene story before judging, so the live path is only twist + sweep + repair (~8-12 LLM calls, under a minute). Keep one rehearsed canned twist as fallback. Cut order: Director branch-kill, secret-goal character agents (canned scenes still demo the twist-repair loop), PlotThread tracking.",
+   "merged_from": [
+    "Retcon",
+    "WritersRoom"
+   ],
+   "avg_score": 37.7,
+   "axis_avg": {
+    "winnability": 6.7,
+    "jac_nativeness": 7.7,
+    "feasibility": 6.7,
+    "demo_wow": 8.3,
+    "originality": 8.3
+   },
+   "judge_notes": [
+    "The most creative demo in the Agentic track \u2014 but fiction continuity is a delightful toy problem, and judges scoring real-world impact will feel that.",
+    "The most original concept in the batch, and pre-generating the story so the live path is only twist-flare-repair (8-12 calls plus a canned fallback) is exactly how a veteran de-risks a demo.",
+    "Knows-edges constraining what characters can say and graph-prefiltered contradiction checking are clever, but the whole live path chains many LLM calls that all must behave on stage."
+   ]
+  },
+  {
+   "name": "MindTheGap",
+   "one_liner": "A tutor that refuses to reteach the failed topic: a walker descends the prerequisite knowledge graph, interrogating the student with LLM micro-questions at each concept until it finds the real missing foundation \u2014 often four grade levels down \u2014 then draws the repair path and remembers your mastery across restarts.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Concept(name, grade_level, canonical_explanation), Student/Learner, Evidence, Lesson. Edges: Prereq/requires(concept->concept, strength) forming a K-8 math DAG; Assessed/mastery(student->concept, score, timestamp). Walkers: DiagnostWalker starts at the failed concept and at each node generates one micro-question, grades the answer, and chooses which Prereq branch to descend \u2014 an informed graph search where the branching decision is a byLLM call AT the node ('can diagnose with Concept entry' is the poster child for object-spatial + byLLM); FrontierWalker (from Pathwise) finds the learnable frontier \u2014 nodes whose prereqs all exceed threshold; RemedyWalker walks back up in topological order emitting the lesson plan. Load-bearing: misconceptions are root causes in a prerequisite DAG \u2014 the traversal IS the diagnosis, and persistence makes the mastery map survive sessions with zero DB code.",
+   "byllm_use": "def micro_question(concept: Concept, history: list[Evidence]) -> DiagnosticQuestion by llm(); def grade(q: DiagnosticQuestion, answer: str) -> Verdict{score, misconception} by llm() \u2014 the misconception field steers the descent; def pick_branch(concept, verdict, prereqs) -> BranchChoice by llm() \u2014 the walker's steering wheel; def map_domain(topic: str) -> list[ConceptSpec] by llm() (from Pathwise) to generate a curriculum graph for any typed topic; def lesson_step(concept, student) -> MicroLesson by llm().",
+   "autonomy": "Visible planning (the walker narrates why it descends each branch), persistent memory (restart the process live: 'welcome back, your frontier: fraction-as-division' \u2014 the student model survived with zero DB code), adaptive questioning, and a two-agent hand-off from diagnosis to remediation.",
+   "demo_moment": "A judge plays a 7th grader who 'can't do algebra word problems'; the knowledge graph lights green/red as the walker descends live, and five questions later a single node deep in 3rd-grade material pulses red: 'fraction-as-division.' The gasp: the real gap was four grade levels down. The repair path draws itself node by node \u2014 then the presenter restarts the app and it resumes from the saved mastery map, skipping every green node.",
+   "feasibility_notes": "Hand-author (or LLM-generate then prune) a ~40-node fractions-to-algebra Prereq DAG in the first hour; preload it as the fallback in case live map_domain is slow on stage. UI is a cytoscape graph plus a chat pane over jac-start REST. Fully local, and every judge instantly understands the domain. Cut order: RemedyWalker lesson content (just highlight the path), map_domain live generation, second subject areas. Distinct from already-suggested RootCause: interactive Socratic diagnosis of a human with LLM-at-node branching, not log analysis.",
+   "merged_from": [
+    "MindTheGap",
+    "Pathwise"
+   ],
+   "avg_score": 36.7,
+   "axis_avg": {
+    "winnability": 7.3,
+    "jac_nativeness": 8.7,
+    "feasibility": 8.0,
+    "demo_wow": 7.0,
+    "originality": 5.7
+   },
+   "judge_notes": [
+    "The four-grades-down reveal is a real and moving education insight, but it is the ALEKS/Knewton thesis rebuilt in a day, and live Socratic Q&A with a judge is a pacing gamble in 4 minutes.",
+    "'The gap was four grade levels down' is instantly legible to every judge and the restart-resume beat is free, but AI tutors are the most crowded category in hackathons and a live judge-as-student segment burns scarce minutes.",
+    "byLLM branch choice inside 'can diagnose with Concept entry' is flagship Jac and every judge instantly understands the four-grade-levels-down gasp; live human-in-the-loop pacing is the only real risk."
+   ]
+  },
+  {
+   "name": "Waterline",
+   "one_liner": "When contamination hits a city water system, walker agents trace the pipe graph downstream to warn every affected home in seconds and upstream to pinpoint the source \u2014 the analysis that took Flint 18 months.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Reservoir, Junction, Valve, ServiceConnection (home/school/hospital with population + vulnerability attrs), Sensor. Edges: Pipe{flow_direction, material: lead/copper, age, diameter}. Walkers: DownstreamTracer (BFS along flow-direction edges from the contaminated sensor, collecting affected buildings, schools/hospitals first), SourceHunter (walks upstream, proposes a minimal sampling plan to bisect candidate source segments), AdvisoryScribe (visits each affected ServiceConnection and emits a typed notice). Load-bearing: contamination propagation IS directed-edge traversal through a physical pipe network \u2014 a table join literally cannot express it, and Jac persistence means cleared branches stay cleared across runs.",
+   "byllm_use": "def classify_lab_report(raw_text: str) -> ContaminantReading by llm() \u2014 paste a messy synthetic lab report, get a typed reading that seeds the graph; def plan_sampling(candidates: list[PipeSegment], budget: int) -> SamplingPlan by llm(); def draft_advisory(building: BuildingProfile, contaminant: str, langs: list[str]) -> Advisory by llm() \u2014 boil-water notices tuned to each building's language and vulnerability.",
+   "autonomy": "Multi-agent coordination: SourceHunter waits on DownstreamTracer's frontier before committing a sampling plan; planning: LLM-generated bisection sampling strategy under a sample budget; memory: walkers persist visited/cleared pipe segments to root so a second run resumes the hunt; tool use: map rendering + advisory generation.",
+   "demo_moment": "Judge pastes a lab report; the pipe map lights up red spreading node-by-node downstream in real time, then SourceHunter races upstream and one corroded lead segment pulses: 'SOURCE \u2014 94% confident, 3 samples to verify' while 1,240 multilingual boil-water notices counter-spin up. The retell: 'They found the lead pipe and warned every home in 30 seconds.'",
+   "feasibility_notes": "Procedurally generate a 150-250 node pipe network (or trace a simplified real city water map) in Jac at startup; frontend is one HTML page with cytoscape/leaflet polling the jac-start REST API; scripted contamination event, zero external dependencies. Cut order: LLM sampling bisection (fallback: plain upstream walk), multilingual notices (keep English).",
+   "merged_from": [
+    "Waterline"
+   ],
+   "avg_score": 36.7,
+   "axis_avg": {
+    "winnability": 6.3,
+    "jac_nativeness": 8.3,
+    "feasibility": 8.7,
+    "demo_wow": 7.0,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "'The analysis that took Flint 18 months, in 30 seconds' is a retell any normal person repeats, and a water utility could actually deploy it \u2014 it just lacks a second act after the trace.",
+    "The Flint framing is emotionally strong and the deterministic pipe traversal cannot flake, but it reads more as a visualization with narration than autonomous agents, and that criterion is explicitly on the rubric.",
+    "Directed-pipe traversal with a Flint narrative is clean and unfailable, but the agents are thin garnish on mostly deterministic BFS \u2014 weak on the 'genuine autonomous behavior' criterion."
+   ]
+  },
+  {
+   "name": "Cordon",
+   "one_liner": "An adversarial LLM 'pathogen' walker strategically spreads through a synthetic contact-tracing graph while a blue team of tester, quarantine, and vaccine agents with a shared budget fights to cut it off \u2014 red vs blue on the same graph, live.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Person(status: hidden/infected/immune, age, occupation), Place(school/office/market). Edges: Contact(frequency, setting), Visits(schedule). Walkers: OutbreakWalker (red \u2014 spreads across Contact edges each tick, picks its next superspreader hub via byLLM), SentinelWalker (tests nodes, revealing hidden state), QuarantineWalker (cuts Contact edges = isolation), VaxWalker (immunizes high-centrality nodes), CommanderWalker (allocates the round budget). Load-bearing: transmission literally IS edge traversal, interventions literally ARE edge deletions and node flips, and both sides reason over centrality \u2014 the graph is the game board.",
+   "byllm_use": "def red_strategy(visible: OutbreakView) -> RedMove{target_place, reasoning} by llm() ('you are the pathogen; choose your next superspreading site'); def allocate_budget(sitrep: SitRep, petitions: list[Petition]) -> BudgetPlan{tests, quarantines, vax, rationale} by llm(); def petition(agent_view: LocalView) -> Petition by llm() so each blue agent argues for resources.",
+   "autonomy": "True adversarial planning on both sides, blue-team division of labor plus resource negotiation (agents file petitions, commander rules), and persistent epidemic state so a mid-demo restart proves memory. The commander making a visible sacrifice call is emergent strategy, not script.",
+   "demo_moment": "Split screen: red's internal monologue left, blue war-room chat right, graph center turning red/blue each tick. The wow beat: the commander writes 'we cannot save the market cluster \u2014 cordon the two bridge nodes' and you watch the cordon edges get cut seconds before red's wave crashes into it and stalls.",
+   "feasibility_notes": "Seeder builds ~80 synthetic people with realistic hub structure (one school, one market). Turn-based: one REST call per tick, so nothing is timing-flaky on stage. Cytoscape frontend with status colors. Cut order: VaxWalker, press-briefing narration, shrink to 50 nodes; minimum viable demo is spread + quarantine + commander.",
+   "merged_from": [
+    "Cordon"
+   ],
+   "avg_score": 35.3,
+   "axis_avg": {
+    "winnability": 6.0,
+    "jac_nativeness": 8.3,
+    "feasibility": 6.7,
+    "demo_wow": 7.3,
+    "originality": 7.0
+   },
+   "judge_notes": [
+    "Red-vs-blue on one graph is a clever game, but it is only a game \u2014 a normal person asks 'who uses this Monday morning' and there is no answer.",
+    "Red-vs-blue adversarial play on one graph is genuinely theatrical and turn-based ticks make it stage-safe, but the 'sacrifice the market cluster' beat is emergent and cannot be guaranteed to happen on cue.",
+    "Adversarial play where every move and countermove is literally an edge deletion or node flip is genuinely graph-native; the risk is the demo reading as a slow turn-based sim rather than a war."
+   ]
+  },
+  {
+   "name": "Jaccuse!",
+   "one_liner": "A procedurally generated murder mystery whose case is a literal evidence graph \u2014 lying suspect agents included \u2014 and a detective walker that interrogates, catches lies as structural graph contradictions, and walks the accusation path Poirot-style.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Suspect(persona, secret, hidden is_guilty), Location, Clue(reliability), Victim, CaseFile with Deduction child nodes (the detective's memory). Edges: alibi(Suspect->Location, time_window), motive(Suspect->Victim, strength), found_at(Clue->Location), implicates(Clue->Suspect). Walkers: MysteryWeaver builds a consistent case graph at startup from one typed CasePlan; DetectiveWalker visits suspects, writes Deductions, picks its next stop by edge coverage (who still has unverified alibi edges); ContradictionChecker is a pure-graph tool walker \u2014 two alibi edges to different Locations with overlapping time_windows structurally CANNOT coexist, so a lie is a graph inconsistency, not an LLM vibe. The final accusation is literally a highlighted path: motive edge + broken alibi edge + implicates edge.",
+   "byllm_use": "def interrogate(suspect_persona: str, secret: str, question: str) -> Testimony by llm() (suspects lie in character); def plan_next_move(case_summary: str, open_questions: list[str]) -> NextMove by llm() (printed live as the plan); def closing_accusation(evidence_chain: list[str]) -> Accusation by llm(); def weave_case(theme: str) -> CasePlan by llm() (one call generates the whole consistent graph).",
+   "autonomy": "Visible planning (NextMove rationale on screen before each interrogation), memory (CaseFile subtree persists \u2014 the detective never re-asks a question and can resume a half-solved case after restart), tool use (invokes the deterministic ContradictionChecker as its verification tool), and adversarial multi-agent play (suspect agents actively deceive the detective agent).",
+   "demo_moment": "The projected case graph starts dark; the audience votes on a suspect first. Each interrogation lights edges up; suddenly two alibi edges flash red \u2014 a structural contradiction \u2014 and the detective walker physically walks the motive->broken-alibi->clue path across the graph while its byLLM closing speech plays. Reveal: the audience was wrong.",
+   "feasibility_notes": "5 suspects, 4 locations, 8 clues \u2014 generated once at startup so there are no live-generation flakes; keep 2 pre-baked case files on disk as fallback. Contradiction logic is ~30 lines of pure Jac. Cut order: audience voting, difficulty levels. Heavy on Jac (case gen, checker, detective all walkers) so >=40% Jac is easy.",
+   "merged_from": [
+    "Jaccuse!"
+   ],
+   "avg_score": 35.3,
+   "axis_avg": {
+    "winnability": 5.7,
+    "jac_nativeness": 8.0,
+    "feasibility": 8.0,
+    "demo_wow": 7.3,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "Lies-as-structural-contradictions is a lovely trick, but LLM murder mysteries are glutted territory and there is no story beyond entertainment.",
+    "Lies as structural graph contradictions is a genuinely clever mechanic with pre-baked case files covering the flaky generation step, but the game framing caps its impact score.",
+    "Lies as structurally impossible alibi-edge pairs is a lovely deterministic core, but LLM murder mysteries are becoming stock hackathon fare."
+   ]
+  },
+  {
+   "name": "LineTrace",
+   "one_liner": "Your tax return as a living dataflow graph: ask 'why did my refund drop $2,143?' and a diff-walker climbs the 1040's dependency tree across two years to pinpoint the exact line \u2014 and phase-out rule \u2014 that did it, with dollar attribution per hop.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: FormLine(id like '1040-L11', value, formula), SourceDoc (W2, 1099NEC, 1099B), Rule (phase-out thresholds, credit eligibility). Edges: feeds_into(role: addend | subtrahend | lookup), derived_from, governed_by. Walkers: PropagateWalker (topological forward pass \u2014 each FormLine's node ability recomputes its value when a parent changes: the return literally recalculates by traversal, pure object-spatial programming), ProvenanceWalker (from the refund line, walks feeds_into edges backwards collecting the value-annotated ancestry), DiffWalker (walks the 2025 and 2026 graphs in lockstep, returns the deepest diverging ancestors with per-line dollar deltas), WhatIfWalker (mutate one leaf \u2014 '+$5k side-gig income' \u2014 re-propagate, catch Rule abilities that trip). Load-bearing: a tax return IS a dataflow DAG; 'why' questions are provenance traversals and cannot be answered from a flat form.",
+   "byllm_use": "def extract_doc(doc_text: str) -> TaxDoc by llm() (paste W-2/1099 text, typed fields become SourceDoc nodes); def explain_diff(path: list[LineDelta]) -> PlainAnswer by llm() ('your side gig pushed AGI past $63,398, which zeroed your EITC on line 27 \u2014 that alone is $1,850 of the drop'); def route_question(q: str) -> WalkerChoice by llm() \u2014 the agent picks which walker to dispatch: LLM as planner, walkers as tools.",
+   "autonomy": "Legible tool use: a natural-language question routes to a walker, the walker returns a cited path of (line, value, delta) tuples, and byLLM narrates ONLY from those citations \u2014 every dollar traceable to a graph node on screen. Memory: both tax years persist as graphs on root. Proactive: runs WhatIfWalker on 3 common scenarios and surfaces 'you are $1,100 of income away from losing the Saver's Credit'.",
+   "demo_moment": "Two years of returns as side-by-side node trees; type 'why did my refund drop $2,143?'; the DiffWalker animates its climb, dimming matching branches and igniting one path from Refund up through EITC to the 1099-NEC node \u2014 with a dollar attribution per hop that sums exactly to $2,143. Explainable AI where the explanation is literally the walk.",
+   "feasibility_notes": "A clearly-labeled SIMPLIFIED 1040: ~25 FormLine nodes, 2 schedules, 3 Rule nodes (EITC phase-out, Saver's Credit, standard deduction) \u2014 formulas hardcoded in node abilities, synthetic W-2/1099 texts pre-written. No IRS data, no PDFs, nothing external. Cut order: WhatIf proactive scan, third Rule, doc-ingestion byLLM (pre-seed docs). Strong Best JacHammer angle: node abilities doing the recalculation.",
+   "merged_from": [
+    "LineTrace"
+   ],
+   "avg_score": 35.0,
+   "axis_avg": {
+    "winnability": 6.0,
+    "jac_nativeness": 9.0,
+    "feasibility": 8.0,
+    "demo_wow": 5.3,
+    "originality": 6.7
+   },
+   "judge_notes": [
+    "'Why did my refund drop' is a universally felt question and the-explanation-is-literally-the-walk is a great judging line, but watching a diff climb a tax tree is cerebral, not visceral.",
+    "Node-abilities-as-recalculation is lovely JacHammer material trapped inside the driest demo domain on the list \u2014 a highlighted path through tax lines will not out-gasp a cascade or a kill -9.",
+    "Node abilities recomputing a 1040 by traversal is textbook object-spatial programming and a real JacHammer angle, but tax provenance is a dry demo that explains better than it excites."
+   ]
+  },
+  {
+   "name": "LandlordLens",
+   "one_liner": "Type your address and walkers crawl a shell-company ownership graph \u2014 pivoting through shared registered agents, mailing addresses, and signatories \u2014 to unmask your landlord's true 47-building portfolio and its violation record, then auto-draft the tenant-union dossier.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Building{violations, evictions}, LLC, Person, MailingAddress, RegisteredAgent. Edges: OwnedBy, ManagedBy, MailsTo, SharesAgent, SignedBy. Walkers: UnmaskWalker starts at one Building, walks OwnedBy to its LLC, then pivots through Agent/Address/Person nodes to sibling LLCs and their buildings \u2014 transitive identity resolution that is pure multi-hop traversal (shell networks are deliberately built as graphs to defeat flat lookups); DossierWalker sweeps the confirmed portfolio aggregating violations/evictions; IngestWalker turns raw records into nodes. Load-bearing: the entire product is multi-hop pivots plus edge-confidence merging \u2014 the graph is the investigation.",
+   "byllm_use": "def extract_entities(deed_text: str) -> PropertyRecord by llm() \u2014 seeds the graph from messy synthetic deed/LLC filings; def same_entity(a: LLCProfile, b: LLCProfile, shared: SharedLinks) -> MatchVerdict by llm() \u2014 the walker asks the LLM to adjudicate weak links with confidence + reasoning before merging; def draft_dossier(portfolio: Portfolio) -> TenantReport by llm() \u2014 a rent-board-ready complaint.",
+   "autonomy": "The walker plans which pivot edges to trust, calls the LLM as an adjudication tool at each weak link, persists confirmed/rejected merges so the network 'learns' across queries, and hands off to a second agent that compiles the dossier \u2014 planning, memory, tool use, and coordination all on screen.",
+   "demo_moment": "Enter '1418 Cedar Ave': the graph explodes outward hop by hop \u2014 1 building becomes 6 LLCs becomes 47 buildings \u2014 while a violations counter spins to 312, and the dossier addressed to the rent board writes itself. The retell: 'your landlord secretly owns 47 buildings, and this proves it.'",
+   "feasibility_notes": "Generate a fully synthetic corpus of ~80 deed/LLC records ahead of time (patterned on real NYC worst-landlord structures) \u2014 no live data on stage. Say the SybilScope differentiation out loud in the pitch: different domain, different data, and the LLM-adjudicated-merge mechanic is new (SybilScope clustered crypto wallets). Cut order: dossier formatting, Person-signatory pivot (keep agent+address pivots).",
+   "merged_from": [
+    "LandlordLens"
+   ],
+   "avg_score": 34.0,
+   "axis_avg": {
+    "winnability": 5.7,
+    "jac_nativeness": 8.0,
+    "feasibility": 8.0,
+    "demo_wow": 7.7,
+    "originality": 4.7
+   },
+   "judge_notes": [
+    "'Your landlord secretly owns 47 buildings' is an electric one-liner, but JustFix's Who Owns What already ships exactly this insight for NYC, and judges who know it will discount the reveal.",
+    "'Your landlord secretly owns 47 buildings' is a killer retell with a pre-baked corpus, but judges who saw SybilScope will smell the same shared-attribute cluster-resolution mechanic in a new coat no matter how loudly the pitch disclaims it.",
+    "The 1-building-to-47-buildings explosion is a great beat and LLM-adjudicated merge gating is good Jac, but pivot-through-shared-attributes clustering is SybilScope's mechanic in a new coat \u2014 judges who remember will discount it."
+   ]
+  },
+  {
+   "name": "Keeper",
+   "one_liner": "Point it at a git repo and it maps exactly which knowledge lives only in one person's head \u2014 then when that person quits, an agent interviews them node-by-node and files the answers back into the graph as real docs committed to the repo.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Person, Module (per source file: risk_score, loc), Concept, DocNote, Question. Edges: authored(Person->Module, line_share, last_touched), imports(Module->Module), explains(DocNote->Module), asked_about. Walkers: Cartographer (parses git log --numstat deterministically, builds Person/Module nodes and authored edges), RiskScanner (computes bus factor per Module; propagates risk along imports edges so a documented module depending on an undocumented one stays risky \u2014 the propagation is why a graph, not a table, is required), ExitInterviewer (walks the departing person's sole-expert frontier in descending risk order, generates one targeted question per red node, converts each answer into a DocNote attached at exactly that node, re-runs RiskScanner so the graph visibly heals). Sole-expertise is the ABSENCE of other authored edges \u2014 inherently relational.",
+   "byllm_use": "def make_question(file_summary: str, code_excerpt: str, commit_messages: list[str]) -> InterviewQuestion{question, why_it_matters} by llm(); def answer_to_doc(question: str, spoken_answer: str, code_excerpt: str) -> DocNote{markdown, filename} by llm(); def summarize_module(code: str) -> str by llm().",
+   "autonomy": "The interviewer plans its own agenda (risk-ordered traversal of the sole-expert frontier), uses tools (reads git, writes actual markdown into docs/), remembers every answer as persistent DocNote nodes, and adapts \u2014 if an answer mentions another module, it enqueues a follow-up question there (walker pushes a new destination). Planning, memory, and tool use in one loop.",
+   "demo_moment": "Load the team's own hackathon repo live. Announce 'Priya leaves Friday' \u2014 14 nodes flood red. The agent interviews Priya on stage (a teammate answers 4 questions out loud); after each answer a DocNote attaches and nodes flip red-to-green in real time. Final beat: run git diff and show real, correctly-placed markdown docs the agent wrote into the repo during the demo.",
+   "feasibility_notes": "Cartographer is pure deterministic git-log parsing \u2014 zero LLM risk, works on any local repo, no network. Only 3 small byLLM functions. Rehearse on the demo repo with fallback answers prepared. Cut order: import-edge risk propagation (plain bus-factor still demos), Concept nodes, follow-up enqueueing. Distinct from ChainViz (package blast-radius viz): this is knowledge risk plus an interviewing agent, not dependency visualization.",
+   "merged_from": [
+    "Keeper"
+   ],
+   "avg_score": 33.7,
+   "axis_avg": {
+    "winnability": 6.3,
+    "jac_nativeness": 6.0,
+    "feasibility": 8.7,
+    "demo_wow": 6.3,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "The most company-shaped idea in the Agentic track \u2014 every judge has lived the 'Priya leaves Friday' problem, and committing real markdown docs live is quiet, credible proof rather than sim theater.",
+    "Bulletproof deterministic git-parsing core and a real git-diff payoff, but red-to-green nodes plus a staged teammate interview is the flattest wow in the Agentic batch and dev-tooling is where the past winners live.",
+    "Useful and safe to build, but authored(Person->Module) is a bipartite table wearing a graph costume \u2014 and the one truly graph-shaped piece (imports risk propagation) is first on the cut list."
+   ]
+  },
+  {
+   "name": "Waterfall",
+   "one_liner": "A cap-table time machine: paste your SAFEs and term sheets, watch them become a live equity graph, then drag an exit-value slider and see exactly where every dollar flows down the preference stack \u2014 and the agent drafts the counter-terms that keep the founders above water.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Stakeholder(founder/employee/fund), Instrument (SAFE{cap, discount} | OptionGrant | Shares{class, qty}), SecurityClass(liq_pref_multiple, participating), Round (immutable event nodes forming a zero-code audit trail), ExitScenario. Edges: owns(qty), converts_to(val_cap, discount, trigger_round), senior_to(SecurityClass->SecurityClass \u2014 the preference stack IS an edge chain), issued_in. Walkers: ConversionWalker (on a new priced Round, traverses SAFEs in legally correct order, applies cap/discount math, spawns Shares nodes and rewires owns edges), WaterfallWalker (given an exit value, walks the senior_to chain top-down distributing proceeds node by node until money runs out \u2014 the waterfall is literally a walk down an edge chain), DilutionWalker (recomputes fully-diluted % after any mutation). Load-bearing: what a SAFE converts into depends on which round triggers it, and who gets paid at exit depends on traversal ORDER through the preference stack \u2014 you cannot express it as a flat table without re-deriving the graph.",
+   "byllm_use": "def parse_terms(term_sheet_text: str) -> RoundTerms{pre_money, amount, liq_pref_multiple, participating, option_pool_pct} by llm() \u2014 the scary legal paragraph becomes typed numbers that directly drive the walkers; def explain_outcome(holder, before, after) -> PlainExplanation by llm() ('you own 22% on paper but receive 4% of proceeds because...'); def counter_terms(sheet: TermSheet, founder_goals: str) -> CounterProposal by llm().",
+   "autonomy": "A watchable agent pipeline: (1) ingest \u2014 byLLM parses raw SAFE/term-sheet text and GROWS the graph live; (2) plan \u2014 the agent sweeps exit values $10M-$200M by dispatching WaterfallWalker repeatedly (walker-as-tool), finds the crossover where the founder's take inverts; (3) memory \u2014 prior rounds persist on root, so run 2 ('now raise a Series A') builds on run 1 with zero reload; (4) act \u2014 drafts a counter-term-sheet and re-simulates to prove the fix.",
+   "demo_moment": "Paste a Series A term sheet containing a 2x participating preference; two SAFE nodes dissolve into Series A share nodes on screen. Drag the exit slider from $200M down to $20M and watch money pour down the senior_to chain until the founders' bucket visibly runs dry, with the agent printing 'Warning: below a $38M exit, common shareholders receive $0.' Then its counterproposal is applied and the same slider drag stays green. A founder-heavy SF judging panel feels this in their spine.",
+   "feasibility_notes": "Zero external data: 3 synthetic SAFE texts + 1 term sheet written in advance; fixed synthetic company (2 founders, option pool, 2 SAFEs) so the math is unit-testable and deterministic \u2014 the LLM only parses in and explains out, both with canned fallbacks. Waterfall math for 1 tier + participating flag is ~80 lines of Jac. Slider degrades to three preset buttons ($20M/$60M/$200M). Cut order: MFN clauses, multi-tier stacked prefs, vesting, pool top-up (hardcode 10%).",
+   "merged_from": [
+    "Waterfall",
+    "CapWalker"
+   ],
+   "avg_score": 33.3,
+   "axis_avg": {
+    "winnability": 6.7,
+    "jac_nativeness": 5.0,
+    "feasibility": 8.7,
+    "demo_wow": 7.7,
+    "originality": 5.3
+   },
+   "judge_notes": [
+    "Precision-targeted at SF founder judges who have personally been burned by participating preferred \u2014 the weakness is that Carta exists and the graph is arguably a dressed-up spreadsheet.",
+    "SF founder-judges will feel the exit slider in their spine and the math is unit-testable by lunch, but the preference stack is arguably a spreadsheet wearing a graph costume \u2014 the weakest Jac story in fintech.",
+    "Founder judges will feel the exit slider in their spine, but a preference stack is a linked list and cap-table waterfalls are solved spreadsheet math \u2014 the graph is mostly decoration."
+   ]
+  },
+  {
+   "name": "CurbCut",
+   "one_liner": "Mark one broken subway elevator and instantly see the blast radius \u2014 every wheelchair user's trip that just became impossible \u2014 then watch the agent file a prioritized 311 repair ticket citing the human cost and escalate repeat offenders from memory.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Station, Platform, Elevator{status}, StreetCorner{has_curb_cut}, Rider{mobility profile}, Trip. Edges: Connects{mode: elevator/ramp/stairs/transit, step_free: bool}; Trips are stored paths of Connects edges. Walkers: TripPlanner traverses only step-free edges per rider; OutageAuditor fires when an Elevator flips to broken and walks outward to find every Trip path passing through it (reverse dependency traversal); AdvocateAgent ranks outages by riders stranded and drafts/files the ticket. Load-bearing: accessible routing is exactly edge-type-constrained pathfinding, and 'blast radius of one elevator' is a reverse traversal you cannot fake with flat data.",
+   "byllm_use": "def draft_repair_ticket(outage: Outage, impacted: list[RiderImpact]) -> Ticket311 by llm() \u2014 evidence-laden complaint with counts and named alternatives-exhausted riders; def accessible_directions(path: list[Segment], rider: Rider) -> PlainDirections by llm() \u2014 screen-reader-friendly step-free directions; def escalation_letter(unit: Elevator, history: list[Outage]) -> AgencyLetter by llm().",
+   "autonomy": "Watches a synthetic outage feed and acts unprompted; decides which outages matter most by traversal-computed impact, not rules; persistent memory of past tickets drives visible escalation ('16th St elevator: 4th outage this month \u2014 escalating to agency letter'); tool use: ticket filing, directions generation.",
+   "demo_moment": "Toggle one elevator off: 37 trips gray out on the map, three riders pulse red as 'zero alternative routes,' and the agent's 311 ticket materializes on screen \u2014 'this unit failed 4 times in 30 days; this outage strands 37 daily trips.' The escalation-from-memory beat lands the autonomy criterion in one visual.",
+   "feasibility_notes": "Model one transit line, ~10 stations, small street grid, 30 synthetic riders with precomputed daily trips \u2014 all authored as Jac spawn code in an hour. Cytoscape/SVG map frontend over jac-start REST. Cut order: street-level curb cuts (transit-only), directions generation; the outage->blast-radius->ticket spine is a half-day of work.",
+   "merged_from": [
+    "CurbCut"
+   ],
+   "avg_score": 33.3,
+   "axis_avg": {
+    "winnability": 5.3,
+    "jac_nativeness": 7.0,
+    "feasibility": 9.0,
+    "demo_wow": 5.7,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "An honest, deployable public good with the cleanest half-day build in the batch, but one grayed-out map and a 311 ticket has the lowest wow ceiling of the Social Impact field.",
+    "The tightest, safest scope in the list with a real civic payoff and a clean memory-escalation beat, but blast-radius-of-one-node visually echoes ChainViz and the wow ceiling is modest.",
+    "An under-covered domain with an honest reverse-dependency traversal, but one elevator toggle and a drafted 311 ticket is a modest ceiling for a 4-minute demo against cascade-and-swarm competitors."
+   ]
+  },
+  {
+   "name": "X-Ray",
+   "one_liner": "Portfolio look-through for normal humans: a walker tunnels through your ETFs' (and their ETFs') holdings to reveal you're secretly 27% one stock \u2014 then an agent rebalances you and proves it by re-running the walker live.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Portfolio(root child), Fund, Stock, Issuer, Sector. Edges: holds(weight) \u2014 crucially Fund->Fund nesting is allowed (fund-of-funds, target-date funds), Stock->Issuer, Issuer->Sector. Walkers: LookThroughWalker (starts at Portfolio, multiplies edge weights as it descends, and on reaching each Stock deposits its accumulated path-weight \u2014 effective exposure is the SUM over all paths, exactly a graph traversal problem, impossible to eyeball from fact sheets), OverlapWalker (finds every path from Portfolio to a chosen Issuer and returns them as citations), RebalanceProbeWalker (applies a candidate swap, re-runs look-through, reports the new concentration). Load-bearing: the entire product insight \u2014 hidden concentration through nested funds \u2014 only exists because exposure is path-multiplication across a DAG.",
+   "byllm_use": "def parse_factsheet(text: str) -> FundHoldings by llm() \u2014 messy fund fact-sheet blurb to typed (ticker, weight) pairs growing the graph; def assess_risk(exposures: list[Exposure]) -> RiskVerdict by llm(); def propose_swap(exposures, constraints: str) -> SwapPlan by llm() (constraints like 'keep it all index funds, no sales triggering gains over $2k' \u2014 persisted on root); def narrate_paths(paths: list[HoldingPath]) -> str by llm().",
+   "autonomy": "A visible plan-act-verify loop: detect concentration (dispatch LookThroughWalker), propose a swap via byLLM, TEST it with RebalanceProbeWalker before recommending (tool use with self-verification), iterate up to 3 times if the threshold isn't met \u2014 the iteration log shown on screen. User constraints persist across runs, so run 2 opens with 'using your saved constraint: no realized gains over $2k'.",
+   "demo_moment": "A boring-looking 6-ETF 'diversified' portfolio; hit Scan and a sunburst lights up FIVE separate glowing paths all terminating at NVDA \u2014 effective exposure 27%. One judge-audible gasp. Then the agent's swap executes, the walker re-runs on stage, and the number falls to 9% with every remaining path still visible and cited.",
+   "feasibility_notes": "Hardcode 8 synthetic funds x ~40 stocks loosely modeled on real ETF top-10s \u2014 no live market data, nothing can flake. Look-through walker is ~50 lines. Sunburst/Sankey via a single served HTML page. Cut order: sector layer, constraint memory, shrink to 4 funds. Split: 1 data seeding, 1 walker logic, 1 agent loop + byLLM, 1 viz.",
+   "merged_from": [
+    "X-Ray"
+   ],
+   "avg_score": 33.0,
+   "axis_avg": {
+    "winnability": 5.7,
+    "jac_nativeness": 6.7,
+    "feasibility": 9.0,
+    "demo_wow": 7.0,
+    "originality": 4.7
+   },
+   "judge_notes": [
+    "Crisp, buildable, and instantly understood \u2014 but Morningstar literally ships this feature under the same name, so the insight reads as a rebuild rather than a discovery.",
+    "Safe, legible, and the 27% NVDA reveal is a real gasp, but the scope is thin enough that judges may wonder where the other six hours went, and portfolio-overlap tools already exist.",
+    "Path-weight multiplication over nested funds is honestly load-bearing and nearly unfailable to build in a day, but it is one 50-line algorithm plus a sunburst \u2014 thin for a track win against richer agent systems."
+   ]
+  },
+  {
+   "name": "Aftershock",
+   "one_liner": "A swarm of scout, medic, and logistics agents self-organizes over an earthquake-damaged city graph, claiming zones and arguing over the last truck, then visibly replans when an aftershock severs roads mid-demo.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Zone(population, damage, triaged), Depot(supplies), Hospital(capacity), Report(text). Edges: Road(travel_time, passable: bool), Assigned(agent_id, role) marking claims so agents never duplicate work. Walkers: ScoutWalker (BFS frontier exploration, triages Reports via 'can triage with Zone entry'), MedicWalker (Dijkstra over passable Road edges to highest-severity unclaimed zone), LogisticsWalker (moves supplies), DispatcherWalker (global replan sweep). Load-bearing: routing cost, passability, and claims ARE edge/node state; the aftershock flips passable=False on three edges and every plan is invalidated, forcing live re-traversal.",
+   "byllm_use": "def triage(report: str, population: int) -> Triage{severity, needs, rationale} by llm(); def award_truck(case_a: ClaimCase, case_b: ClaimCase) -> Award{winner, reason} by llm() to arbitrate when two medics want the same scarce vehicle; def sitrep(events: list[str]) -> str by llm() for a running commander log.",
+   "autonomy": "Visible division of labor (scouts explore, medics exploit, logistics supplies), negotiation over scarce resources with an LLM arbiter and on-screen argument transcript, replanning on environment change, and persistence-as-memory: kill the process, 'jac start' again, and the swarm resumes from its claim marks on the graph.",
+   "demo_moment": "Presenter hits the AFTERSHOCK button: three road edges snap on the live map, a district goes dark, and within 30 seconds scouts flood the cut-off area, two medic agents argue over the last truck in a visible transcript, and the dispatcher's new routes re-light the map.",
+   "feasibility_notes": "Seeder walker generates a synthetic 40-node grid city; frontend is one cytoscape.js page polling a jac-start REST endpoint that dumps graph JSON (keeps repo >=40% Jac). Turn-based ticks, no real-time engine. Cut order: sitrep narration, multiple depots -> one, fancy map -> ASCII terminal render.",
+   "merged_from": [
+    "Aftershock"
+   ],
+   "avg_score": 32.7,
+   "axis_avg": {
+    "winnability": 6.0,
+    "jac_nativeness": 8.0,
+    "feasibility": 6.0,
+    "demo_wow": 7.7,
+    "originality": 5.0
+   },
+   "judge_notes": [
+    "The aftershock-replan beat is genuinely dramatic, but disaster-response agent sims are stock hackathon fare with no plausible path from demo to deployment.",
+    "Four walker species plus LLM negotiation plus a live map is more moving parts than 8 hours forgives, and disaster-swarm-with-replanning is a demo judges have seen at every hackathon since 2015.",
+    "Roads, claims, and passability as edge state is honest Jac, but disaster-response swarms are the most generic Agentic AI archetype and four walker roles plus negotiation is a lot of surface for 8 hours."
+   ]
+  },
+  {
+   "name": "Emberline",
+   "one_liner": "A wildfire evacuation drill where the fire, the fleeing households, and the AI dispatcher are all walkers on the same town graph: a typed 911 report plants the hazard, roads snap shut, routes reroute live \u2014 and the dispatcher's persuasive targeted alerts measurably save 14 more families than the generic countywide blast.",
+   "track": "Social Impact",
+   "graph_model": "Nodes: Intersection, Home/Household(persona, mobility, has_car, size, language, false-alarm memory), Shelter(capacity, accessible), Bus, FireCell(terrain lattice), Hazard. Edges: road(capacity, congestion, status: open/smoke/blocked, flammability), terrain_adj(vegetation, wind_alignment), AssignedTo(household->shelter with the current route stored as a path attribute). Walkers: FireWalker spreads along terrain/road edges each tick, flipping edge status \u2014 contagion as traversal, adversarial to everyone else on the same graph (from Firebreak); RoutePlanner finds affected households by walking BACKWARD from a newly blocked edge along stored route paths and re-runs shortest-path only for them (incremental replanning falls out of routes living as paths in the graph, from HighGround); HouseholdAgents decide whether to actually leave, then pathfind; BusDispatcher re-sequences pickups for carless and wheelchair households; DispatcherAgent cuts burned edges, reroutes, and drafts per-neighborhood alerts. Load-bearing: fire spread and traffic are BOTH literal edge traversal, and 'who is affected by this closure' is a reverse traversal.",
+   "byllm_use": "def parse_report(transcript: str, known_places: list[str]) -> IncidentReport{location_hint, hazard_type, severity} by llm() \u2014 'heavy black smoke by the depot on 3rd' (in any language) becomes a typed graph mutation; def household_choice(persona, alert_text, smoke_visible, neighbors_leaving) -> EvacChoice by llm() \u2014 capturing the real emergency-management problem that people ignore generic alerts; def draft_alert(neighborhood, risk, route, language) -> AlertMessage by llm() \u2014 the dispatcher's writing quality measurably changes compliance; def triage_unreachable(h: Household, options) -> RescuePlan by llm().",
+   "autonomy": "Continuous sense-replan-notify loop on screen; the dispatcher plans (which neighborhoods, what order, which routes), uses tools (shortest-path and congestion-forecast walkers), and adapts when the fire deletes an edge; households are independent skeptical agents whose persisted false-alarm memory must be overcome by better writing \u2014 agents persuading agents. Replans show diffs: '14 households rerouted, 2 unreachable \u2014 dispatching Bus 3'.",
+   "demo_moment": "Split screen, same fire seed. Left: generic countywide alert \u2014 gridlock forms, 9 homes overrun. Right, live: a judge types a 911 report in Spanish, the hazard blooms at the right intersection, three roads snap shut as the fire advances, 40 route-lines visibly reroute, the bus's stop list reorders itself, one household turns red as 'unreachable' and the dispatcher claims it with a rescue plan \u2014 final scoreboard: 'the AI dispatcher saved 14 more families.'",
+   "feasibility_notes": "Synthetic 8x8 to 30x30 grid town, ~15-30 households, deterministic tick loop, canvas rendering \u2014 everything synthetic so nothing flakes. Fire spread and routing are pure Jac walkers (keeps Jac percentage high) and testable without the LLM. Pre-record the generic-alert baseline so the live demo only runs the good one. Cut order: wind model, bus dispatch (keep rerouting + unreachable detection), false-alarm memory, multilingual input, live A/B (use the recording).",
+   "merged_from": [
+    "Emberline",
+    "Firebreak",
+    "HighGround"
+   ],
+   "avg_score": 32.0,
+   "axis_avg": {
+    "winnability": 5.0,
+    "jac_nativeness": 8.3,
+    "feasibility": 4.3,
+    "demo_wow": 8.3,
+    "originality": 6.0
+   },
+   "judge_notes": [
+    "The 'better-written alerts save 14 more families' persuasion insight is the most original impact angle here, but three merged ideas' worth of moving parts is the worst scope risk in the list for 8 hours.",
+    "A three-idea merger carrying a fire sim, skeptical household agents, bus dispatch, multilingual 911 parsing, and an A/B baseline \u2014 the textbook overscope that gets hacked down to a broken half-demo by 6pm.",
+    "The most graph-saturated concept here \u2014 fire, traffic, and blast-radius are all literal traversal \u2014 but it is three merged ideas deep, and fire sim plus routing plus household agents plus buses is a two-day build wearing an 8-hour badge."
+   ]
+  },
+  {
+   "name": "CrossExam",
+   "one_liner": "A Prosecutor agent and Defender agent duel over a claim by growing a live argument graph \u2014 attacking each other's weakest undefended points with cited evidence from a merged claim map \u2014 until a Judge walker crawls the tree bottom-up and delivers a weakest-link verdict.",
+   "track": "Agentic AI",
+   "graph_model": "Nodes: Claim(text), Argument(text, side, strength), Evidence(quote, source, reliability), SourceDoc(full text), Verdict. Edges: Supports(strength), Refutes, Rebuts(Argument->Argument), CitedBy. Walkers: Prosecutor and Defender alternate turns \u2014 each turn is a graph query ('find opponent's leaf Arguments with no incoming Rebuts edge, pick the strongest') followed by spawning a rebuttal subtree; EvidenceScoutWalker traverses SourceDoc nodes wiring Evidence, using byLLM same_claim() dedup (from Steelman) so both sides' citations fuse into one shared map instead of fragmenting; JudgeWalker does a post-order traversal where each argument's surviving weight = own strength minus un-rebutted rebuttals, with weakest-link min-propagation down support chains. Load-bearing: 'strongest undefended point' and the verdict computation are pure graph structure \u2014 impossible to fake with a flat transcript.",
+   "byllm_use": "def make_rebuttal(target: str, evidence: list[str], side: str) -> Rebuttal{text, cites, strength} by llm(); def assess_doc(claim: str, doc: str) -> Relevance{relevant, quote, direction} by llm(); def same_claim(a: str, b: str) -> bool by llm() \u2014 one-line typed semantic dedup; def rule(tree_summary: DebateSummary) -> Verdict{ruling, confidence, reasoning} by llm().",
+   "autonomy": "Turn-taking competition where each agent plans its attack via graph queries, tool use (corpus search over SourceDoc nodes), and the debate tree as persistent memory \u2014 pause the trial, restart the server, resume mid-cross-examination.",
+   "demo_moment": "Type a spicy claim ('this startup's leaked Q3 numbers prove it is profitable'), watch the argument tree grow left-vs-right in two colors for 90 seconds, then the Judge walker visibly crawls it bottom-up graying out defeated branches one by one, floods one node red \u2014 'the entire case rests on this one uncited statistic' \u2014 and stamps a cited verdict with confidence score.",
+   "feasibility_notes": "Seed 10-15 short synthetic source documents written by the team. Cap at 3 rounds, ~15 argument nodes. Frontend: cytoscape dagre tree layout, colors by side. Cut order: same_claim dedup -> normalized string match, EvidenceScout -> pre-linked evidence, 3 rounds -> 2, live claim input -> canned claim.",
+   "merged_from": [
+    "CrossExam",
+    "Steelman"
+   ],
+   "avg_score": 31.7,
+   "axis_avg": {
+    "winnability": 5.0,
+    "jac_nativeness": 7.7,
+    "feasibility": 6.7,
+    "demo_wow": 6.0,
+    "originality": 6.3
+   },
+   "judge_notes": [
+    "The weakest-link verdict computed from graph structure is intellectually the sharpest mechanic here, but 'AI debate club' has no urgent customer and the two-agent-plus-judge build is heavy for 8 hours.",
+    "LLM-vs-LLM debate is hackathon cliche; the structural weakest-link verdict is the only fresh part, and 90 seconds of a text tree slowly growing is a quiet 4 minutes.",
+    "The post-order weakest-link verdict is real graph computation, but a wall of argument text is the weakest stage visual in the batch and multi-agent debate is a known pattern."
+   ]
+  },
+  {
+   "name": "The Floor",
+   "one_liner": "A typhoon closes a port and autonomous buyer/supplier agents with distinct personas renegotiate broken contracts across the supply graph in open outcry \u2014 offers, counteroffers, and bidding wars nobody scripted \u2014 ending with a winners/losers P&L.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Company(role, cash, inventory, persona), Hub/Port(open: bool), Contract(qty, price, status). Edges: Route(mode, lead_time, open), Supplies(part), PartyTo. Walkers: ShockWalker (closes a hub, then traverses Route paths to cascade at_risk status onto every Contract whose delivery path broke \u2014 'is this contract at risk' = path existence), BrokerWalker per company (path-search for alternative suppliers, opens negotiations), NegotiationWalker (physically carries offer objects between Company nodes, accumulating the thread history as it shuttles \u2014 walker-carried negotiation memory), AuditorWalker (final P&L sweep). Load-bearing: contract risk is path existence, 'who can I buy from instead' is graph search, the cascade is a traversal.",
+   "byllm_use": "def draft_offer(me: CompanyView, need: Need, quotes: list[QuoteInfo]) -> Offer{price, qty, message} by llm(); def respond(offer: Offer, me: CompanyView, thread: list[str]) -> Response{action, counter, message} by llm() \u2014 each Company carries a persona string ('aggressive discounter', 'relationship-first, hates being rushed') that flows into the prompt, so negotiation styles visibly differ.",
+   "autonomy": "Competing self-interested agents with private state, multi-turn negotiation threads with memory carried by the shuttle walker, planning (find path first, then negotiate along it), and genuinely emergent outcomes \u2014 e.g., two retailers unintentionally bidding up the same scarce supplier.",
+   "demo_moment": "Click 'Typhoon closes the port': a red cascade rolls through the graph flagging six contracts, then the floor opens \u2014 negotiation speech bubbles pop over the map as brokers trade messages \u2014 and 40 seconds later new green contract edges snap into place while the Auditor reads out who got rich and who got squeezed.",
+   "feasibility_notes": "Seeder builds ~12 companies, 2 hubs, 8 contracts with a solvable-but-tight alternative-supply structure so drama is guaranteed. Turn-based negotiation rounds via REST ticks. Cut order: personas from five to two archetypes, P&L table -> plain totals, multi-part inventories -> single commodity. Distinct from Tulip Mania (asset-market sentiment) and Domino (solvency cascade): this is B2B contract renegotiation over physical routes.",
+   "merged_from": [
+    "The Floor (supply-chain typhoon version)"
+   ],
+   "avg_score": 31.3,
+   "axis_avg": {
+    "winnability": 5.3,
+    "jac_nativeness": 7.3,
+    "feasibility": 6.3,
+    "demo_wow": 6.7,
+    "originality": 5.7
+   },
+   "judge_notes": [
+    "Agentic contract renegotiation is a real market (Pactum proves it), but emergent negotiation is hard to make legible in 4 minutes and risks reading as scripted speech bubbles.",
+    "Multi-turn negotiations converging to green contracts in 40 seconds is the flakiest live promise in the batch \u2014 open-outcry speech bubbles read as chaos, not coordination, inside 4 minutes.",
+    "The offer-shuttling NegotiationWalker accumulating thread history is a nice Jac touch, but multi-turn LLM negotiation between a dozen agents is pacing-fragile inside a 4-minute window."
+   ]
+  },
+  {
+   "name": "Tulip Mania",
+   "one_liner": "A live financial-contagion terrarium: 15 LLM trader agents with personalities on a follow-graph \u2014 the audience types one trader's persona live, a judge injects a rumor, a bubble inflates and pops with grudges forming along the way, and a regulator agent's replay halves the crash.",
+   "track": "Fintech/Open",
+   "graph_model": "Nodes: Trader(persona: fomo/contrarian/quant/influencer, cash, cost_basis memory), Asset(price, fundamentals), NewsDesk. Edges: follows(influence_weight), position(avg_cost), dealt(price, qty, ts \u2014 the tape IS the accumulating deal-history edges, from The Floor), grudge(severity) between traders. Walkers: HypeWalker carries a sentiment payload outward along follows edges (contagion IS traversal \u2014 who panics depends on topology, a whale's blast radius is literally a BFS), TickWalker sweeps traders collecting TradeDecisions and moves price by net demand, RegulatorAgent watches cascade depth and can halt trading or dispatch a fact-check walker. NOT manipulation detection on real markets (PolyWatch found manipulation; this GROWS a bubble from emergent agent behavior).",
+   "byllm_use": "def decide_trade(persona, portfolio, price_history, heard, grudges) -> TradeDecision{action, qty, reasoning, panic_level} by llm(); def respond(offer, persona, position) -> Response{accept|counter|walk_away, price, patter} by llm() \u2014 patter renders as live speech bubbles; def write_headline(market_event: str) -> Headline by llm() (live news chyron); def regulator_call(cascade_report: str) -> Intervention by llm().",
+   "autonomy": "A heterogeneous agent society: traders remember cost basis and past burns (persisted \u2014 a trader burned yesterday is gun-shy today), lay grudge edges that measurably change future dealings ('Blue refuses to deal with Red since the olive-oil incident'), influencers deliberately amplify, and the regulator plans interventions. The A/B run (regulator off vs on) makes autonomy consequences measurable, not decorative.",
+   "demo_moment": "An audience member types 'paranoid doomsday prepper who hoards canned beans' \u2014 that trader starts cornering the bean market with in-character speech bubbles. Then a judge presses the big red button injecting 'TULP is being acquired': the sentiment wave glows outward across the follow-graph while the candlestick chart moons, the whale dumps, the graph cascades red, the circuit breaker fires \u2014 and the instant replay with the regulator on shows crash depth visibly halved.",
+   "feasibility_notes": "Turn-based rounds (~2s) bound LLM cost; only traders touched by the hype wave call the LLM each tick (others use cached persona heuristics). 15 traders, all synthetic, price = simple net-demand impact, no order book. Chart + graph on one static page fed by jac start endpoints. Cut order: regulator A/B (pre-record run A), news chyron, grudge edges, shrink to 8 traders.",
+   "merged_from": [
+    "Tulip Mania",
+    "The Floor (marketplace trader version)"
+   ],
+   "avg_score": 30.7,
+   "axis_avg": {
+    "winnability": 5.0,
+    "jac_nativeness": 6.3,
+    "feasibility": 5.7,
+    "demo_wow": 8.0,
+    "originality": 5.7
+   },
+   "judge_notes": [
+    "Maximum crowd-pleasing chaos, but agent-based market sims are decades-old academic furniture and nothing here survives contact with 'so what happens after the demo.'",
+    "Highest fun-per-minute in fintech if the improv lands, but emergent bubbles refusing to inflate on cue is exactly the flavor of demo risk that kills projects at 7pm, and the scope (chart, graph, audience input, replay) is fat.",
+    "Maximum entertainment, but the graph mostly routes prompts between persona LLMs \u2014 the price action and drama are LLM theater rather than traversal, and the merged feature list is bloated for 8 hours."
+   ]
+  }
+ ],
+ "sharpened": [
+  {
+   "name": "Chain of Life",
+   "pitch": "Ninety thousand Americans are waiting for a kidney, and thousands of them have a loved one ready to donate \u2014 just with the wrong blood type. Chain of Life models the real UNOS kidney paired-donation problem as a living Jac graph: paste one messy referral email and an LLM mints an altruistic donor node, a walker's DFS lights up a six-transplant swap chain, hospital advocate agents argue over conflicting chains, an ethics arbiter rules against a written policy, and when a donor withdraws mid-demo the system re-plans live and salvages four lives. The graph, the algorithm, and the agents aren't a metaphor here \u2014 this is the actual shape of the actual problem, and the lives-saved counter is the entire point.",
+   "graph_schema": "// jaclang 0.16.x \u2014 same syntax family as our working money_graph.jac\n// Verify typed-edge operator (+>:Type(...):+> vs ++>:Type:...) in the first 30 min.\n\nnode Registry {                    // singleton under root: the lives-saved counter + demo state\n    has lives_saved: int = 0;\n    has lives_at_risk: int = 0;\n    has phase: str = \"idle\";       // drives frontend animation state\n}\n\nnode Hospital {\n    has name: str;                 // \"UCSF\", \"Stanford\", \"CPMC\", \"Zuckerberg SF General\"\n    has color: str;                // cluster color for cytoscape\n}\n\nnode Pair {                        // one incompatible donor+patient couple\n    has pair_id: str;              // \"P07\"\n    has patient_name: str;\n    has patient_blood: str;        // \"O\" | \"A\" | \"B\" | \"AB\"\n    has donor_name: str;\n    has donor_blood: str;\n    has urgency: int;              // 1-10, used by policy + arbiter\n    has wait_months: int;\n    has status: str = \"waiting\";   // waiting | in_chain | transplanted | stranded | withdrawn\n}\n\nnode AltruisticDonor {\n    has name: str;\n    has blood: str;\n    has hospital: str;\n    has note_excerpt: str;         // quote from the parsed referral email\n    has status: str = \"available\"; // available | committed | withdrawn\n}\n\nnode Chain {                       // a candidate/approved swap chain \u2014 minted BY the ChainSeeker walker\n    has chain_id: str;             // \"C1\"\n    has hop_ids: list;             // ordered pair_ids, e.g. [\"ALT\",\"P03\",\"P11\",\"P07\",\"P22\",\"P14\"]\n    has kind: str;                 // \"altruist\" (open chain) | \"cycle\" (2-3 way swap)\n    has lives: int;                // len of hops that get a kidney\n    has status: str = \"proposed\";  // proposed | approved | rejected | executed | broken\n    has narration: str = \"\";       // explain_chain() output\n    has rationale: str = \"\";       // arbiter's reason if approved/rejected\n}\n\nnode Docket {                      // holds the advocate cases + policy for one arbitration round\n    has policy_text: str;          // the written ethics policy, shown verbatim on screen\n    has cases: list = [];          // serialized Case objects\n}\n\n// ---- edges ----\nedge AtHospital {}                       // Pair --> Hospital\nedge CanGive { has score: float; }       // donor of Pair A (or AltruisticDonor) --> Pair B whose\n                                         // patient can receive; score = blood match + synthetic HLA jitter.\n                                         // Laid down by CompatibilityWeaver. THIS is the digraph the DFS runs on.\nedge InChain { has position: int; }      // Pair --> Chain (membership + hop order)\nedge Starts {}                           // AltruisticDonor --> Chain\n\n// Blood compatibility is a plain dict, not LLM: O->all, A->{A,AB}, B->{B,AB}, AB->{AB}.\n// Dataset is HAND-SEEDED (gen_data.jac) so exactly these exist: one 6-hop altruist chain,\n// two overlapping alternatives sharing P12, one 3-cycle, and a 4-hop rescue path that\n// survives removal of the pair whose donor withdraws. Never trust randomness on stage.",
+   "byllm_functions": [
+    "import from byllm.llm { Model }  //  glob llm = Model(model_name=\"gemini/gemini-2.5-flash\");",
+    "obj DonorProfile { has name: str; has blood: str; has hospital: str; has age: int; has note_excerpt: str; }\n\"\"\"Extract the altruistic kidney donor's structured profile from this messy clinical referral email.\"\"\"\ndef parse_intake(referral_note: str) -> DonorProfile by llm();",
+    "obj Case { has hospital: str; has backed_chain_id: str; has argument: str; has priority_score: int; }\n\"\"\"You are the transplant advocate for one hospital. Given the proposed chains touching your patients, argue for the chain that best serves them, citing urgency and wait time.\"\"\"\ndef plead(my_hospital: str, my_patients: list[str], chain_summaries: list[str], policy: str) -> Case by llm();",
+    "obj Ruling { has approved_chain_ids: list[str]; has rejected_chain_ids: list[str]; has rationale: str; }\n\"\"\"You are the allocation arbiter. Chains sharing any pair conflict and cannot both proceed. Apply the written policy to the advocates' cases and select a maximal non-overlapping set.\"\"\"\ndef arbitrate(cases: list[Case], conflict_map: str, policy: str) -> Ruling by llm();  // output is VALIDATED in Jac: if the LLM's set overlaps, fall back to greedy max-lives disjoint selection and log it",
+    "\"\"\"Narrate this kidney swap chain in warm plain English for the families, one short sentence per hop.\"\"\"\ndef explain_chain(hops: list[str]) -> str by llm();"
+   ],
+   "walkers": [
+    "CompatibilityWeaver \u2014 spawns on root, visits every Pair and AltruisticDonor. At each donor-side node it checks the blood-type dict against every other Pair's patient_blood and lays a CanGive(score) edge for each legal match (score = 1.0 base + seeded HLA jitter). Turns 30 disconnected red dots into the directed compatibility digraph in one pass. ~30 lines.",
+    "ChainSeeker \u2014 THE demo centerpiece. Spawns on the AltruisticDonor (open-chain mode) or on each Pair (cycle mode). Carries `has path: list = []; has visited: set;` and walks `visit [->:CanGive:->]` depth-first; the walker's carried state literally IS the candidate chain, which is the line we say to judges. On an altruist walk it emits a Chain node when depth hits the 6-hop cap or a dead end >= 3; in cycle mode it emits when an edge closes back to its origin pair (2- and 3-cycles only, per real KPD practice). Marks members with InChain edges, calls explain_chain() for narration, sets Registry.phase so the frontend animates hop-by-hop. Restrictable to a subset of pairs \u2014 same walker is reused verbatim for the rescue replan.",
+    "AdvocateWalker \u2014 one spawned per Hospital, visits its Hospital node then its member Pairs then the proposed Chains touching them. Gathers chain summaries and calls plead() to draft a Case with a conflict of interest baked into the prompt (it only cares about its own patients), appends the Case to the Docket. This is the visible multi-agent coordination beat. [CUTTABLE \u2014 behind the 3:30pm gate]",
+    "ArbiterWalker \u2014 visits the Docket then all proposed Chains. Computes the pair-overlap conflict map deterministically in Jac, calls arbitrate() with cases + verbatim policy text, then VALIDATES the ruling: if approved chains overlap, override with greedy max-lives disjoint set. Stamps status + rationale on each Chain. LLM reasons, Jac enforces invariants \u2014 say that sentence to judges. [CUTTABLE with AdvocateWalker; a no-LLM greedy picker replaces it in 15 min]",
+    "ExecuteWalker \u2014 visits approved Chains then their member Pairs, flips status to transplanted, increments Registry.lives_saved per hop (frontend ticks the counter), sets chain status executed. Also the persistence flex: kill the process, restart, counter and graph are still there.",
+    "DropoutWalker \u2014 the autonomy beat. Takes withdrawn_id, visits that Pair/AltruisticDonor, marks it withdrawn, walks its InChain edge to the Chain, sets status broken, marks downstream hops stranded and moves their lives to Registry.lives_at_risk. Then re-spawns ChainSeeker restricted to stranded + remaining waiting pairs; the rescue chain that comes back is scored, auto-approved (or sent through the arbiter if that subplot survived), and executed. Event -> replan -> recovery with zero human input.",
+    "get_state \u2014 trivial reporting walker for the frontend: visits everything, reports one JSON blob {pairs, edges, chains, registry} that cytoscape renders. Exposed via `jac start` REST; also runnable via `jac run` to dump phase snapshot files for the fallback stepper."
+   ],
+   "hour_plan": [
+    "10:45-11:15 \u2014 ALL 4 together: create repo, freeze the node/edge schema above (no schema changes after 11:15 without all-hands vote), verify the typed-edge operator and `jac start` REST auth flow on a 10-line probe file, confirm Gemini key works (we already have working byllm_spin.jac and money_graph.jac patterns to copy from /Users/shivam/Downloads/JacHacks/jac-demo). Assign roles: A = graph core + ChainSeeker (strongest Jac person), B = byLLM functions + advocate/arbiter, C = cytoscape frontend, D = data seeding + REST glue + Devpost/video owner.",
+    "11:15-12:15 \u2014 A: nodes, edges, blood dict, CompatibilityWeaver working on toy data. B: parse_intake end-to-end (paste email -> DonorProfile -> node under root) + hardcoded cached response for the exact demo email as exception fallback. C: index.html with cytoscape vendored locally (mark cytoscape.min.js linguist-vendored in .gitattributes so it doesn't eat the 40% Jac quota), hospital cluster layout, red/gold node styling, rendering from a checked-in fake state.json. D: gen_data.jac writing the 30-pair, 4-hospital dataset HAND-SEEDED so the 6-chain, the two overlapping rivals on P12, the 3-cycle, and the post-dropout 4-hop rescue path all provably exist (write a tiny assert walker that verifies all four before every demo).",
+    "12:15-1:30 \u2014 A: ChainSeeker DFS, both modes, Chain nodes minted, hop cap 6. B: explain_chain + Docket node. C: hop-by-hop chain animation (stagger CanGive edge highlights, then flash chain gold) + lives counter widget. D: get_state walker returning the full JSON blob; smoke-test `jac start` + register/login token script; grab lunch for everyone.",
+    "1:30-2:30 \u2014 INTEGRATION MILESTONE 1 (all hands until green): paste email in the UI -> donor node appears -> Find Chains button -> animated 6-chain -> counter ticks to 6, all through the live REST loop. If the live loop is fighting us for more than 45 min, switch NOW to the snapshot-stepper transport (jac run dumps phase JSONs, frontend steps through them) and never look back \u2014 the walkers don't change either way.",
+    "2:30-3:30 \u2014 A: ExecuteWalker + DropoutWalker with rescue re-spawn; verify counter math 6 -> at-risk -> 7 on the seeded data. C: chain-shatter animation (gray + crack), rescue chain relight, counter drop/climb. B: starts plead()/arbitrate() in isolation against fixture chains. D: writes the ethics policy text (5 bullet rules: urgency first, ties to wait time, no hospital >50% of transplants in a round, pediatric bump, minimize stranded pairs), README skeleton, starts Devpost draft.",
+    "3:30-4:00 \u2014 GO/NO-GO GATE (the judges' exact warning, honored): demo spine = intake + chain + dropout-rescue + counter must be flawless on 3 consecutive runs. If NOT: advocates/arbiter are cut to a single static pre-generated ruling card (or cut entirely) and B joins polish. If YES: B wires AdvocateWalker + ArbiterWalker + disjointness validator into the live flow; C builds the advocate-cards panel and policy sidebar.",
+    "4:00-5:00 \u2014 B+C: arbitration beat integrated (3 advocate cards stream in, ruling with rationale, counter to 9). A: hardening \u2014 assert-walker green, restart-persistence flex rehearsed (kill jac process live, restart, graph intact), error paths on LLM timeouts (8s timeout -> cached response). D: Devpost text finished, screenshots captured, 1:30 video voiceover script written verbatim.",
+    "5:00-5:50 \u2014 Feature freeze at 5:00 sharp. Two full timed dress runs of the 4-minute demo with the actual presenter. 5:35: D submits the MANDATORY PARTIAL DEVPOST (title, tagline, description, track = Social Impact, repo URL, screenshots) \u2014 done and confirmed BEFORE 5:50pm, no exceptions, this is unrecoverable if missed.",
+    "5:50-6:30 \u2014 Record the 1:30 video: screen-record dress run 3 with D reading the voiceover live (no editing ambitions \u2014 one continuous take, two attempts max, pick the better). A: runs a language-stats check on the repo (git ls-files + wc by extension) to confirm >=40% Jac; if short, the fix is moving any Python glue into .jac and confirming .gitattributes vendoring, NOT deleting the frontend.",
+    "6:30-7:00 \u2014 Final Devpost: upload video, final README with graph diagram and 'walker state IS the chain' explainer, push everything, verify the repo is public and the Devpost links resolve in an incognito window.",
+    "7:00-7:15 \u2014 Buffer only. Re-run the assert walker, stage the demo laptop (data reset script, browser zoomed, network-independent fallback snapshots loaded in a second tab), submit final. Nothing new gets built in this window."
+   ],
+   "demo_script": "0:00-0:25 \u2014 COLD OPEN. Screen shows 30 red donor-patient pairs clustered around 4 SF hospitals, all disconnected. \"Ninety thousand Americans are waiting for a kidney. Every red pair on this screen is a patient whose husband, sister, or friend is ready to donate today \u2014 and can't, because the blood type is wrong. Each pair is a dead end. Until someone connects them.\"\n\n0:25-0:55 \u2014 THE INTAKE. Presenter pastes a genuinely messy referral email (\"...pt's neighbor Maria G, healthy 44F, O-neg, presented at UCSF wanting non-directed donation, cleared psych eval...\") into the intake box. byLLM's parse_intake mints a typed AltruisticDonor node that drops into the UCSF cluster, gold. \"No form. No schema. One paragraph became a typed node in a persistent graph \u2014 that's one line of Jac.\"\n\n0:55-1:35 \u2014 THE CHAIN. Click FIND CHAINS. Compatibility edges fade in, then the ChainSeeker walker animates hop by hop \u2014 Maria's kidney to Patient 3, Pair 3's donor to Patient 11, onward \u2014 six hops across three hospitals flash gold. Lives counter ticks 0 to 6. Plain-English narration scrolls: \"Maria gives to David at UCSF; David's wife Ana gives to...\" \u2014 \"The walker's carried state IS the chain. This is the same class of algorithm UNOS actually runs, on the domain that invented it.\"\n\n1:35-2:20 \u2014 THE CONFLICT. Two rival chains light up, both needing Pair 12 \u2014 approving one kills the other. Three hospital advocate agents file arguments on screen, each openly biased toward its own patients. The written ethics policy is visible in the sidebar. The arbiter rules: approves the 6-chain and a 3-cycle, rejects the rival, with a written rationale citing policy rule 2. Counter ticks to 9. \"The LLM reasons; Jac enforces the invariants \u2014 the ruling is machine-verified disjoint before anything executes.\"\n\n2:20-3:20 \u2014 THE GUT PUNCH (the wow moment setup). Presenter clicks \"Donor 7 has withdrawn.\" The 6-chain shatters gray on screen, counter flashes 9 down to 3, three stranded patients pulse red. Beat of silence. \"In the real world this happens constantly, and stranded patients go back to the end of the line.\" Then \u2014 unprompted \u2014 the DropoutWalker re-plans: the ChainSeeker re-spawns from the stranded pairs and a rescue chain relights node by node across the hospitals. Counter climbs to 7. \"Nobody clicked anything. The system detected the break, re-planned, and saved four of the six on its own.\"\n\n3:20-4:00 \u2014 THE CLOSE + PERSISTENCE FLEX. Presenter kills the Jac process in the terminal, restarts it \u2014 graph, chains, and counter are all still there. \"Zero database code. This entire system \u2014 the graph, the matching algorithm, four kinds of agents \u2014 is about 500 lines of Jac.\" Final frame: the lives counter, large: 7. \"Seven people who were dead ends four minutes ago. Chain of Life.\" END ON THE COUNTER.",
+   "biggest_risk": "The live end-to-end transport, not the algorithm. The DFS is 50 lines and the byLLM calls are individually trivial; what can eat the whole afternoon is the frontend -> jac-start REST (with its register/login token dance) -> byLLM -> graph JSON -> cytoscape animation loop being flaky on stage, compounded by live Gemini latency mid-demo. Secondary expression of the same risk: an unseeded random dataset in which the 6-chain, the P12 conflict, or the rescue path simply doesn't exist during the demo. Both are mitigated structurally \u2014 the 1:30-2:30 all-hands integration milestone with a hard 45-minute bailout to the snapshot-stepper transport, the hand-seeded dataset with an assert walker run before every rehearsal, and cached LLM responses behind an 8-second timeout for the exact demo inputs.",
+   "fallback": "Ordered cut list, invoked at the 3:30pm gate or the moment any dress run fails, per the judges' explicit warning. (1) Drop live REST first, not features: run every walker via `jac run` dumping phase-1..5 state JSONs, and the frontend becomes a stepper that plays the pre-computed snapshots \u2014 visually identical on stage, all computation still genuinely done by Jac walkers, immune to network and latency. (2) Cut the advocate-vs-arbiter subplot: keep one pre-generated ruling card as a static screen (15 seconds of demo) or delete the beat entirely; the spine of intake -> chain -> dropout-rescue -> counter carries all four judging criteria on its own. (3) Shrink the world: 4 hospitals to 2, 30 pairs to 14, 6-hop chain to 4-hop \u2014 the animation reads the same. (4) If byLLM misbehaves live, every LLM call falls through to a cached synthetic response for the exact demo inputs (built at 11:15, not at 6pm). Never cut, under any circumstances: the hop-by-hop chain animation, the dropout-rescue replan, and the lives-saved counter \u2014 those three ARE the project."
+  }
+ ],
+ "dropped": [
+  {
+   "name": "TrustFall",
+   "reason": "Too close to already-suggested RootCause: 'walk upstream a dependency graph to find the silently broken cause' is the identical mechanic with data-warehouse lineage swapped in for microservices. LineTrace keeps the provenance-walk niche with a genuinely different diff/attribution angle."
+  },
+  {
+   "name": "Overruled",
+   "reason": "Structurally overlaps the already-suggested living research knowledge graph with cited answers (cited why-answers walked out of an ingested knowledge graph); demo also depends on pre-ingested transcripts, leaving little live drama for 4 minutes."
+  },
+  {
+   "name": "PickupLine",
+   "reason": "Adjacent to the already-suggested mutual-aid needs/offers matcher (community reciprocity coordination with a fairness ledger), and its dashboard-heals-itself wow is the mildest of the Social Impact batch."
+  },
+  {
+   "name": "RailRoute",
+   "reason": "Weakest fintech demo moment (comparing two landed-amount numbers), and its headline 'autonomous reroute' is a scripted fee-hike button rather than emergent behavior; pathfinding-over-fee-edges is a thin agent story next to the kept fintech ideas."
+  },
+  {
+   "name": "PayDay",
+   "reason": "The Week->next->Week timeline is nearly a linear list \u2014 the weakest load-bearing graph in the fintech batch \u2014 and its toggle-red-fix-green beat is done better by X-Ray and LineTrace."
+  },
+  {
+   "name": "EvenSteven",
+   "reason": "Parse-then-deterministic-netting has thin visible autonomy, the cycle-cancellation wow is modest, and it family-resembles the already-suggested invoice/PO/payment reconciliation agent (parse messy financial records, reconcile, settle)."
+  },
+  {
+   "name": "HouseHunch",
+   "reason": "Preference inference is clever but most of the scoring is flat list-ranking; only the small transit subgraph is real traversal, so the graph reads as decorative next to keepers \u2014 and the swipe-demo wow is moderate."
+  },
+  {
+   "name": "Quorum",
+   "reason": "Fails the load-bearing test by its own admission ('elimination logic is simple set intersection made visual'); the advocate walkers add ceremony, not necessity. Weakest graph story in the batch."
+  },
+  {
+   "name": "SeatSmith",
+   "reason": "Seating-as-graph-partition is legitimate but the autonomy is one extraction pass plus local search \u2014 the weakest agent story among the Agentic AI candidates, and judges may read the graph as a scoring matrix in disguise."
+  },
+  {
+   "name": "HeatShield",
+   "reason": "Fourth entrant in the Social Impact reachability family (Waterline, CurbCut, Emberline all kept and stronger); its greedy siting loop reads as an optimization routine rather than visible agent behavior, the softest autonomy of the four."
+  },
+  {
+   "name": "SecondHelping",
+   "reason": "The leftover chain is close to a linear meal sequence, and the single magic beat (LLM mints a bridge recipe) cannot carry a 4-minute demo against the kept Social Impact ideas."
+  },
+  {
+   "name": "Grudgeville",
+   "reason": "Its two signature beats are owned by stronger keepers: the kill-the-server persistence mic-drop by Walkers & Wyverns (which adds the traps-as-node-abilities JacHammer story) and the mutating-gossip mechanic by Patient Zero; as a standalone sandbox it has the weakest 'so what' of the game cluster."
+  },
+  {
+   "name": "Trailhead",
+   "reason": "Third codebase-graph idea behind Keeper and Lazarus with the mildest wow (a path re-draws when you click 'I already know that'); lesson-reading is slow stage material for 4 minutes."
+  },
+  {
+   "name": "The Infinite Band",
+   "reason": "Fails the no-flaky-live-dependency rule: live audio timing plus four synchronized LLM-composing walkers is the highest stage risk in the batch (the panel itself flags it riskiest), and the fallback \u2014 pre-rendered MIDI \u2014 guts the autonomy claim."
+  }
+ ]
+}
