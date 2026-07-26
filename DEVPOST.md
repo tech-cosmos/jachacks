@@ -47,6 +47,16 @@ just fly the eagles" logic holes (opinions).
 - Extraction accuracy vs annotated ground truth reported as a number by
   `jac run main.jac score` — we measure our weakest link instead of hiding it.
 
+**It runs on real full-length transcripts, cheaply.** We ingested actual film
+transcripts (Monsters, Inc. — 136K chars/22 scenes, Monsters University
+screenplay — 59 chunks, Final Destination 3, The Lady Vanishes) straight from
+.docx, auto-chunked, extracted with `deepseek/deepseek-v4-flash` at
+$0.14/M tokens — the full 139-scene corpus costs ~$0.10 to process. Zero
+false confirms on the unfamiliar films. Real data also caught a design bug:
+Final Destination 3's Kevin collided with Home Alone's Kevin in global canon,
+which is why documents now declare a **canon scope** (`# CANON: home-alone`)
+— related episodes share canon, unrelated films don't.
+
 ## How we used Jac (≈58% of code by bytes; 953 of 1536 lines — well over the 40% bar)
 
 Everything except one static HTML file is Jac (`main.jac`) — **including the

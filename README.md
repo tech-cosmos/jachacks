@@ -58,8 +58,17 @@ jac run main.jac naive data/home_alone_ep1.txt data/home_alone_ep2.txt
 
 `./demo.sh prep|find|naive|amend|score|serve` drives the whole demo arc.
 
-`CW_NO_LLM=1` runs the graph pipeline on annotated facts only (no API calls);
-`CW_MODEL` overrides the default `gemini/gemini-2.5-flash`.
+**Real documents:** `.docx` transcripts ingest directly — `Scene N:` headings
+are recognized, headingless transcripts are auto-chunked, and
+`jac run main.jac convert <src.docx> <out.txt> "<Title>"` writes a reusable
+reel. Films that share a story world declare `# CANON: <scope>` so episodes
+and prequels share canon while unrelated films stay isolated.
+
+`CW_NO_LLM=1` runs the graph pipeline on annotated facts only (no API calls).
+`CW_MODEL` overrides the extraction model (default:
+`openrouter/deepseek/deepseek-v4-flash` — ~$0.10 for a 139-scene corpus;
+falls back to `gemini/gemini-2.5-flash` without an OpenRouter key), and
+`CW_JUDGE_MODEL` sets the adjudicator separately.
 
 Scene files are plain text: `## SCENE n` headers + prose. Optional `@expect`
 lines are *not* shown to the LLM — they're ground truth used to score
