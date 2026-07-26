@@ -35,9 +35,19 @@ def pick_model() -> str {
     return "gemini/gemini-2.5-flash";
 }
 
+def pick_judge() -> str {
+    m = os.environ.get("CW_JUDGE_MODEL", "");
+    if m != "" {
+        return m;
+    }
+    if os.environ.get("OPENROUTER_API_KEY", "") != "" {
+        return "openrouter/anthropic/claude-sonnet-5";
+    }
+    return pick_model();
+}
+
 glob llm = Model(model_name=pick_model());
-glob judge_llm = Model(
-    model_name=os.environ.get("CW_JUDGE_MODEL", pick_model()));
+glob judge_llm = Model(model_name=pick_judge());
 
 # ---------------------------------------------------------------- typed facts
 
@@ -212,6 +222,21 @@ def doc_title(doc_index: int) -> str {
         }
     }
     return f"doc {doc_index}";
+}
+
+glob MULTI_VALUED = ["knowledge", "possession", "plan", "desire", "action",
+                     "emotion", "goal"];
+
+def same_state(pred: str, a: str, b: str) -> bool {
+    if a == b {
+        return True;
+    }
+    if pred == "alive" {
+        t = ["true", "yes", "alive", "living", "intact"];
+        f = ["false", "no", "dead", "destroyed", "wiped_out", "gone"];
+        return (a in t and b in t) or (a in f and b in f);
+    }
+    return False;
 }
 
 def related(a: str, b: str) -> bool {
@@ -691,8 +716,22 @@ walker Auditor {
                     n_nocanon += 1;
                     continue;
                 }
+                if req.predicate in MULTI_VALUED {
+                    # many values can hold at once (you know/own many things):
+                    # supported if ANY prior state matches, never a violation
+                    ok = False;
+                    for st in hist {
+                        if same_state(req.predicate, st.value, req.value) {
+                            ok = True;
+                        }
+                    }
+                    if ok {
+                        n_supported += 1;
+                    }
+                    continue;
+                }
                 latest = hist[-1];
-                if latest.value == req.value {
+                if same_state(req.predicate, latest.value, req.value) {
                     n_supported += 1;
                     continue;
                 }
@@ -1123,6 +1162,41 @@ with entry {
         HTTPServer(("0.0.0.0", port), ApiHandler).serve_forever();
     } elif cmd == "dump" {
         root spawn Dump();
+    } elif cmd == "drop" {
+        frag = " ".join(argv[2:]).lower();
+        if frag == "" {
+            print("usage: jac run main.jac drop <title fragment>");
+        } else {
+            n = 0;
+            for d in all_documents() {
+                if frag in d.title.lower() {
+                    for v in [root -->[?:Violation]] {
+                        if v.req_doc == d.doc_index {
+                            del v;
+                        }
+                    }
+                    for seg in [d -->[?:Segment]] {
+                        for st in [seg --> ] {
+                            del st;
+                        }
+                        del seg;
+                    }
+                    print(f"dropped document [{d.doc_index}] {d.title}");
+                    del d;
+                    n += 1;
+                }
+            }
+            if n == 0 {
+                print(f"no document title matches: {frag}");
+            }
+        }
+    } elif cmd == "clearviols" {
+        n = 0;
+        for v in [root -->[?:Violation]] {
+            del v;
+            n += 1;
+        }
+        print(f"cleared {n} violation records (canon untouched)");
     } elif cmd == "reset" {
         root spawn Reset();
     } else {
