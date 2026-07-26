@@ -58,6 +58,19 @@ jac run main.jac naive data/home_alone_ep1.txt data/home_alone_ep2.txt
 
 `./demo.sh prep|find|naive|amend|score|serve` drives the whole demo arc.
 
+**Teammates: don't re-index.** The extracted canon ships in the repo as
+`canon_share.json` (facts + cached verdicts, no transcript prose). After
+cloning:
+
+```sh
+jac run main.jac import canon_share.json   # full canon, zero LLM calls, no keys
+jac run main.jac serve                     # → http://localhost:8765
+```
+
+Re-exporting after new ingests: `jac run main.jac export canon_share.json`
+(add `prose` as a third arg to include scene text — don't commit that for
+copyrighted transcripts). You only need API keys to ingest *new* scenes.
+
 **Real documents:** `.docx` transcripts ingest directly — `Scene N:` headings
 are recognized, headingless transcripts are auto-chunked, and
 `jac run main.jac convert <src.docx> <out.txt> "<Title>"` writes a reusable

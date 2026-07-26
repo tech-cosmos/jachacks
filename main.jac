@@ -994,6 +994,108 @@ walker Reset {
     }
 }
 
+# ------------------------------------------------------------ export/import
+
+def do_export(path: str, with_prose: bool) {
+    docs = [];
+    for d in all_documents() {
+        segs = [];
+        for seg in sorted([d -->[?:Segment]],
+                          key=lambda x: Segment : x.order) {
+            prose = "";
+            if with_prose {
+                prose = seg.prose;
+            }
+            segs.append({
+                "order": seg.order, "prose": prose,
+                "exp_total": seg.exp_total, "exp_matched": seg.exp_matched,
+                "establishes": [{"subject": st.subject,
+                                 "predicate": st.predicate,
+                                 "value": st.value}
+                                for st in [seg ->:Establishes:->]],
+                "requires": [{"subject": st.subject,
+                              "predicate": st.predicate,
+                              "value": st.value}
+                             for st in [seg ->:Requires:->]]});
+        }
+        docs.append({"title": d.title, "kind": d.kind,
+                     "doc_index": d.doc_index, "canon": d.canon,
+                     "segments": segs});
+    }
+    viols = [{"subject": v.subject, "predicate": v.predicate,
+              "required_value": v.required_value,
+              "found_value": v.found_value, "req_doc": v.req_doc,
+              "req_seg": v.req_seg, "timeline": v.timeline,
+              "status": v.status, "confidence": v.confidence,
+              "reasoning": v.reasoning}
+             for v in [root -->[?:Violation]]];
+    f = open(path, "w");
+    f.write(json.dumps({"documents": docs, "violations": viols}, indent=1));
+    f.close();
+    print(f"exported {len(docs)} documents, {len(viols)} verdicts -> {path}");
+}
+
+def do_import(path: str) {
+    f = open(path, "r");
+    data = json.loads(f.read());
+    f.close();
+    if len(all_documents()) > 0 {
+        print("canon is not empty — run reset first to import a snapshot.");
+        return;
+    }
+    for dd in data.get("documents", []) {
+        doc = Document(title=dd["title"], kind=dd["kind"],
+                       doc_index=dd["doc_index"], canon=dd.get("canon", ""));
+        root ++> doc;
+        for sd in dd["segments"] {
+            seg = Segment(order=sd["order"], doc_index=doc.doc_index,
+                          prose=sd.get("prose", ""),
+                          exp_total=sd.get("exp_total", 0),
+                          exp_matched=sd.get("exp_matched", 0));
+            doc ++> seg;
+            for fc in sd["establishes"] {
+                st = State(subject=fc["subject"], predicate=fc["predicate"],
+                           value=fc["value"], doc_index=doc.doc_index,
+                           seg_order=seg.order);
+                seg +>:Establishes:+> st;
+            }
+            for fc in sd["requires"] {
+                st = State(subject=fc["subject"], predicate=fc["predicate"],
+                           value=fc["value"], doc_index=doc.doc_index,
+                           seg_order=seg.order);
+                seg +>:Requires:+> st;
+            }
+        }
+        print(f"+ document [{doc.doc_index}] {doc.title}");
+    }
+    states = all_established();
+    for i in range(len(states)) {
+        prev = None;
+        for j in range(i) {
+            if states[j].subject == states[i].subject
+                and states[j].predicate == states[i].predicate {
+                prev = states[j];
+            }
+        }
+        if prev is not None and prev.value != states[i].value {
+            prev +>:Transition:+> states[i];
+            states[i] +>:Supersedes:+> prev;
+        }
+    }
+    for vd in data.get("violations", []) {
+        root ++> Violation(subject=vd["subject"], predicate=vd["predicate"],
+                           required_value=vd["required_value"],
+                           found_value=vd["found_value"],
+                           req_doc=vd["req_doc"], req_seg=vd["req_seg"],
+                           timeline=vd["timeline"], status=vd["status"],
+                           confidence=vd.get("confidence", ""),
+                           reasoning=vd.get("reasoning", ""));
+    }
+    print(f"imported {len(data.get('documents', []))} documents, "
+          f"{len(data.get('violations', []))} cached verdicts. "
+          f"No LLM calls needed.");
+}
+
 # ----------------------------------------------------------------- http api
 
 def api_analyze(body: dict) -> dict {
@@ -1164,6 +1266,18 @@ with entry {
         HTTPServer(("0.0.0.0", port), ApiHandler).serve_forever();
     } elif cmd == "dump" {
         root spawn Dump();
+    } elif cmd == "export" {
+        out = "canon_share.json";
+        if len(argv) > 2 {
+            out = argv[2];
+        }
+        do_export(out, "prose" in argv[3:]);
+    } elif cmd == "import" {
+        src = "canon_share.json";
+        if len(argv) > 2 {
+            src = argv[2];
+        }
+        do_import(src);
     } elif cmd == "drop" {
         frag = " ".join(argv[2:]).lower();
         if frag == "" {
