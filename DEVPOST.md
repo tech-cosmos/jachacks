@@ -47,9 +47,12 @@ just fly the eagles" logic holes (opinions).
 - Extraction accuracy vs annotated ground truth reported as a number by
   `jac run main.jac score` — we measure our weakest link instead of hiding it.
 
-## How we used Jac (≈79% of the code by bytes, 799 of 992 lines)
+## How we used Jac (≈58% of code by bytes; 953 of 1536 lines — well over the 40% bar)
 
-Everything except one static HTML file is Jac (`main.jac`):
+Everything except one static HTML file is Jac (`main.jac`) — **including the
+HTTP server**: the web API (`/api/analyze`, `/api/naive`, `/api/reset`) is a
+`BaseHTTPRequestHandler` subclassed *in Jac* via Python interop, so the entire
+backend, graph, walkers, and serving layer live in one Jac module:
 - **Object-spatial schema**: `Document`, `Segment`, `State`, `Violation`
   nodes; `Establishes`, `Requires`, `Transition`, `Supersedes` typed edges.
 - **Walkers**: `Ingest`, `Auditor`, `ShowCanon`, `Score`, `Dump`, `Reset` —
