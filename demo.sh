@@ -5,6 +5,8 @@
 #   ./demo.sh naive   what a raw LLM does with the same script (run twice!)
 #   ./demo.sh amend   add the long-distance defense to canon → finding withdrawn
 #   ./demo.sh score   extraction accuracy scoreboard
+#   ./demo.sh contracts        MSA + amendments -> 2 confirmed inconsistencies
+#   ./demo.sh contracts-amend  corrective amendment -> findings withdrawn
 #   ./demo.sh serve   viz at http://localhost:8765
 set -e
 cd "$(dirname "$0")"
@@ -39,9 +41,26 @@ case "$1" in
     $J run main.jac score
     $J run main.jac canon
     ;;
+  contracts)
+    # the "not just movies" beat: MSA + 2 amendments -> 2 CONFIRMED
+    # drafting inconsistencies (or: jac run main.jac import canon_contracts.json
+    # into an empty canon for the zero-LLM-call version)
+    $J run main.jac ingest data/contract_msa.txt
+    $J run main.jac ingest data/contract_amendment_1.txt
+    $J run main.jac ingest data/contract_amendment_2.txt
+    $J run main.jac audit
+    $J run main.jac dump
+    ;;
+  contracts-amend)
+    # corrective Amendment No. 3 restores the terms -> findings WITHDRAWN
+    # (live version: paste it in the UI's AMENDMENT DESK tab instead)
+    $J run main.jac ingest data/contract_amendment_3.txt
+    $J run main.jac audit
+    $J run main.jac dump
+    ;;
   serve)
     $J run main.jac serve
     ;;
   *)
-    echo "usage: ./demo.sh prep|find|naive|amend|score|serve" ;;
+    echo "usage: ./demo.sh prep|find|naive|amend|score|contracts|contracts-amend|serve" ;;
 esac

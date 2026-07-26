@@ -20,7 +20,10 @@ import re;
 import html;
 import zipfile;
 import subprocess;
+import base64;
+import tempfile;
 import litellm;
+import from pypdf { PdfReader }
 import from byllm.llm { Model }
 import from http.server { HTTPServer, BaseHTTPRequestHandler }
 
@@ -132,6 +135,65 @@ confidence is one of high / medium / low."""
 def adjudicate(requirement: str, canon_timeline: str,
                scene_excerpt: str) -> Verdict by judge_llm();
 
+"""Extract concrete STATE facts from one section of a legal contract or
+amendment.
+
+establishes: terms this section puts in force from now on — a defined term is
+set or redefined, a payment/notice/duration value is set or changed, a clause
+or exhibit is added, amended, restated, or deleted, an obligation begins or
+ends (e.g. payment_terms = net_30, exhibit_b = in_force, exhibit_b = deleted,
+governing_law = delaware).
+
+requires: terms that must ALREADY be in force for this section to operate —
+its load-bearing references. When a section explicitly relies on, references,
+extends, or incorporates another clause, defined term, exhibit, or rate, you
+MUST emit a requires fact that it is in force with the referenced value
+(invoking a Net-30 early-payment discount requires payment_terms = net_30;
+incorporating Exhibit B requires exhibit_b = in_force). A section that merely
+references, confirms, ratifies, or says a term shall "continue" does NOT
+establish that term — emit it as a requires; emit establishes only for what
+the section itself CHANGES or newly enacts. Do not emit a requires for what
+this same section itself enacts, restores, or repeals.
+
+Rules:
+- subject: canonical snake_case id of the term/clause/exhibit/party, e.g.
+  "payment_terms", "exhibit_b", "support_hours". You MUST reuse an id from
+  known_subjects when the scene refers to the same term, even if worded
+  differently.
+- predicate: one lowercase word such as status / value / definition /
+  duration / party. Use "status" with values in_force / deleted for whether a
+  clause or exhibit is operative.
+- value: SHORT — one or two lowercase words joined by underscore ("net_30",
+  "in_force", "deleted"). Reuse the exact value wording already in
+  known_subjects facts when the same state is meant.
+- Only objectively checkable contract states. No legal opinions or
+  predictions.
+- Return 2-6 establishes and 0-3 requires; only the load-bearing ones.
+"""
+def extract_facts_contract(section: str, known_subjects: list[str],
+                           known_predicates: list[str]) -> SceneFacts by llm();
+
+"""You are adjudicating a candidate inconsistency in a contract and its chain
+of amendments. The canon timeline lists, in execution order, every state the
+contract documents ever put in force for the relevant terms. The requirement
+comes from a later section that relies on a specific term being in force.
+
+Rules of adjudication:
+- A contract changes ONLY by written instrument. If the latest canon state
+  contradicts the requirement and NO fact in the timeline re-enacts or
+  restores the required term, that IS an inconsistency. Do not assume
+  unwritten side letters, waivers, or verbal understandings — an unwritten
+  fix is exactly what a drafting error is.
+- It is NOT an inconsistency if a fact in the timeline itself makes the
+  requirement satisfiable (e.g. a carve-out or survival clause that keeps the
+  referenced term alive for this purpose).
+- It is NOT an inconsistency if the mismatch is pure wording — both values
+  describe the same operative state (e.g. net_thirty vs net_30, operative vs
+  in_force).
+confidence is one of high / medium / low."""
+def adjudicate_contract(requirement: str, canon_timeline: str,
+                        section_excerpt: str) -> Verdict by judge_llm();
+
 """List the plot holes in this script. Be specific and number them."""
 def find_plot_holes(script: str) -> list[str] by judge_llm();
 
@@ -222,6 +284,21 @@ def doc_title(doc_index: int) -> str {
         }
     }
     return f"doc {doc_index}";
+}
+
+def doc_kind(doc_index: int) -> str {
+    for d in all_documents() {
+        if d.doc_index == doc_index {
+            return d.kind;
+        }
+    }
+    return "script";
+}
+
+def is_contract(kind: str) -> bool {
+    k = kind.lower();
+    return "contract" in k or "agreement" in k or "amendment" in k
+        or "legal" in k;
 }
 
 glob MULTI_VALUED = ["knowledge", "possession", "plan", "desire", "action",
@@ -318,20 +395,40 @@ def cli_json(prompt: str, model: str) -> dict {
     return json.loads(out[i:j + 1]);
 }
 
-def cli_extract(scene: str, ks: list, kp: list) -> SceneFacts {
+def cli_extract(scene: str, ks: list, kp: list, kind: str = "script") -> SceneFacts {
     model = os.environ.get("CW_CLI_MODEL", "haiku");
+    if is_contract(kind) {
+        intro = (
+            "Extract concrete STATE facts from this section of a legal "
+            "contract or amendment.\n\n"
+            "establishes: terms this section puts in force from now on (a "
+            "defined term set or changed, a clause/exhibit added, amended, or "
+            "deleted, an obligation begun or ended — e.g. payment_terms = "
+            "net_30, exhibit_b = deleted).\n"
+            "requires: terms that must ALREADY be in force for this section "
+            "to operate. If a section relies on, references, or incorporates "
+            "another clause, defined term, exhibit, or rate, you MUST include "
+            "a requires that it is in force with the referenced value. A "
+            "section that merely references, confirms, or continues a term "
+            "does NOT establish it — that is a requires; establishes is only "
+            "for what the section itself CHANGES. Never require what this "
+            "same section enacts, restores, or repeals.\n\n");
+    } else {
+        intro = (
+            "Extract concrete STATE facts from this scene of a screenplay.\n\n"
+            "establishes: facts this scene makes true from now on (state set or "
+            "changed: broken/repaired, down/up, moved, died, learned, gained, "
+            "lost, or a stated world rule).\n"
+            "requires: facts that must ALREADY be true for the scene's action to "
+            "be physically possible. If a character successfully USES a device or "
+            "service, you MUST include a requires that it is working. If a group "
+            "acts and their survival could be in doubt, require them alive. Never "
+            "require what this same scene creates or destroys. Location "
+            "requirements only for where someone must be when the scene STARTS.\n\n");
+    }
     prompt = (
-        "Extract concrete STATE facts from this scene of a screenplay.\n\n"
-        "establishes: facts this scene makes true from now on (state set or "
-        "changed: broken/repaired, down/up, moved, died, learned, gained, "
-        "lost, or a stated world rule).\n"
-        "requires: facts that must ALREADY be true for the scene's action to "
-        "be physically possible. If a character successfully USES a device or "
-        "service, you MUST include a requires that it is working. If a group "
-        "acts and their survival could be in doubt, require them alive. Never "
-        "require what this same scene creates or destroys. Location "
-        "requirements only for where someone must be when the scene STARTS.\n\n"
-        "Rules: subject = canonical snake_case entity id — REUSE from "
+        intro
+        + "Rules: subject = canonical snake_case entity id — REUSE from "
         f"known_subjects when the same thing is meant: {ks}\n"
         f"predicate = one lowercase word, reuse from: {kp}\n"
         "value = 1-2 lowercase words joined by underscore; use exactly "
@@ -353,20 +450,36 @@ def cli_extract(scene: str, ks: list, kp: list) -> SceneFacts {
     return SceneFacts(establishes=est, requires=req);
 }
 
-def cli_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
+def cli_adjudicate(requirement: str, tl: str, excerpt: str,
+                   kind: str = "script") -> Verdict {
     model = os.environ.get("CW_CLI_JUDGE_MODEL", "sonnet");
+    if is_contract(kind) {
+        intro = (
+            "You are adjudicating a candidate inconsistency in a contract "
+            "and its chain of amendments. The canon timeline lists every "
+            "state the documents put in force, in execution order. Rules: a "
+            "contract changes ONLY by written instrument — do not assume "
+            "unwritten side letters, waivers, or verbal understandings; an "
+            "unwritten fix is exactly what a drafting error is. NOT an "
+            "inconsistency if a timeline fact makes the requirement "
+            "satisfiable (carve-out, survival clause), or the mismatch is "
+            "pure wording for the same operative state.\n\n");
+    } else {
+        intro = (
+            "You are adjudicating a candidate continuity error in one continuous "
+            "story. The canon timeline lists every state the script established, "
+            "in story order. Rules: the story world changes ONLY when a scene "
+            "establishes the change — do not invent off-screen repairs or fixes, "
+            "however mundane; an unwritten fix is exactly what a continuity error "
+            "is. NOT a contradiction if a timeline fact makes the requirement "
+            "satisfiable, or the mismatch is pure wording for the same real "
+            "state. Location mismatches are only contradictions if canon makes "
+            "the move impossible; device/service/life states change only via an "
+            "establishing scene.\n\n");
+    }
     prompt = (
-        "You are adjudicating a candidate continuity error in one continuous "
-        "story. The canon timeline lists every state the script established, "
-        "in story order. Rules: the story world changes ONLY when a scene "
-        "establishes the change — do not invent off-screen repairs or fixes, "
-        "however mundane; an unwritten fix is exactly what a continuity error "
-        "is. NOT a contradiction if a timeline fact makes the requirement "
-        "satisfiable, or the mismatch is pure wording for the same real "
-        "state. Location mismatches are only contradictions if canon makes "
-        "the move impossible; device/service/life states change only via an "
-        "establishing scene.\n\n"
-        f"REQUIREMENT: {requirement}\n\nCANON TIMELINE:\n{tl}\n\n"
+        intro
+        + f"REQUIREMENT: {requirement}\n\nCANON TIMELINE:\n{tl}\n\n"
         f"SCENE EXCERPT:\n{excerpt}\n\n"
         "Respond with ONLY this JSON:\n"
         "{\"is_contradiction\": true, \"confidence\": "
@@ -386,7 +499,8 @@ def cli_naive(script: str) -> list {
     return [str(h) for h in d.get("holes", [])];
 }
 
-def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
+def safe_extract(prose: str, ks: list, kp: list,
+                 kind: str = "script") -> SceneFacts {
     delay = float(os.environ.get("CW_DELAY", "0"));
     if delay > 0 {
         time.sleep(delay);
@@ -395,7 +509,10 @@ def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
     while attempt < 3 {
         try {
             if backend() == "claude" {
-                return cli_extract(prose, ks, kp);
+                return cli_extract(prose, ks, kp, kind);
+            }
+            if is_contract(kind) {
+                return extract_facts_contract(prose, ks, kp);
             }
             return extract_facts(prose, ks, kp);
         } except Exception as e {
@@ -407,7 +524,8 @@ def safe_extract(prose: str, ks: list, kp: list) -> SceneFacts {
     return SceneFacts(establishes=[], requires=[]);
 }
 
-def safe_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
+def safe_adjudicate(requirement: str, tl: str, excerpt: str,
+                    kind: str = "script") -> Verdict {
     delay = float(os.environ.get("CW_DELAY", "0"));
     if delay > 0 {
         time.sleep(delay);
@@ -416,7 +534,10 @@ def safe_adjudicate(requirement: str, tl: str, excerpt: str) -> Verdict {
     while attempt < 3 {
         try {
             if backend() == "claude" {
-                return cli_adjudicate(requirement, tl, excerpt);
+                return cli_adjudicate(requirement, tl, excerpt, kind);
+            }
+            if is_contract(kind) {
+                return adjudicate_contract(requirement, tl, excerpt);
             }
             return adjudicate(requirement, tl, excerpt);
         } except Exception as e {
@@ -460,6 +581,14 @@ obj ScriptData {
 }
 
 def read_doc(path: str) -> str {
+    if path.lower().endswith(".pdf") {
+        reader = PdfReader(path);
+        pages = [];
+        for pg in reader.pages {
+            pages.append(pg.extract_text() or "");
+        }
+        return re.sub("\n{3,}", "\n\n", "\n".join(pages)).strip();
+    }
     if path.lower().endswith(".docx") {
         z = zipfile.ZipFile(path);
         xml = z.read("word/document.xml").decode("utf-8");
@@ -614,7 +743,7 @@ walker Ingest {
                       f"({len(sc.exp_est)} est, {len(sc.exp_req)} req)");
             } else {
                 facts = safe_extract(sc.prose, sorted(set(known_subj))[:80],
-                                     sorted(set(known_pred))[:30]);
+                                     sorted(set(known_pred))[:30], doc.kind);
                 if len(facts.establishes) == 0 and len(facts.requires) == 0
                     and len(sc.exp_est) + len(sc.exp_req) > 0 {
                     facts = SceneFacts(establishes=sc.exp_est, requires=sc.exp_req);
@@ -738,7 +867,12 @@ walker Auditor {
 
                 key = f"{req.subject}|{req.predicate}|{seg.doc_index}|{seg.order}";
                 seen.append(key);
-                tl = timeline_for(req.subject, scoped);
+                # the segment under test cannot vouch for itself: its own
+                # establishes are excluded from the evidence timeline
+                evidence = [st for st in scoped
+                            if not (st.doc_index == seg.doc_index
+                                    and st.seg_order == seg.order)];
+                tl = timeline_for(req.subject, evidence);
                 requirement = (f"Scene {fmt_scene(seg.order)} of "
                                f"'{doc_title(seg.doc_index)}' requires: "
                                f"{req.subject} {req.predicate} = {req.value}");
@@ -764,7 +898,8 @@ walker Auditor {
                     confidence = "";
                     reasoning = "exact-match mismatch (LLM adjudication off)";
                 } else {
-                    verdict = safe_adjudicate(requirement, tl, seg.prose[:400]);
+                    verdict = safe_adjudicate(requirement, tl, seg.prose[:400],
+                                              doc_kind(seg.doc_index));
                     if verdict.confidence == "unadjudicated" {
                         status = "candidate";
                     } elif verdict.is_contradiction {
@@ -1099,13 +1234,96 @@ def do_import(path: str) {
 # ----------------------------------------------------------------- http api
 
 def api_analyze(body: dict) -> dict {
-    w = Ingest(text=body.get("text", ""),
+    text = body.get("text", "");
+    kind = body.get("kind", "").strip();
+    if kind != "" and "# KIND:" not in text {
+        text = f"# KIND: {kind}\n" + text;
+    }
+    w = Ingest(text=text,
                title_hint=body.get("title", "Pasted Script"));
     root spawn w;
     root spawn Auditor(quiet=True);
     data = write_graph("web/graph.json");
     return {"log": w.log, "violations": data["violations"],
             "score": score_stats()};
+}
+
+def api_extract(body: dict) -> dict {
+    name = body.get("name", "upload.pdf");
+    raw = base64.b64decode(body.get("b64", ""));
+    suffix = os.path.splitext(name)[1] or ".pdf";
+    tmp = tempfile.NamedTemporaryFile(suffix=suffix, delete=False);
+    tmp.write(raw);
+    tmp.close();
+    text = "";
+    err = "";
+    try {
+        text = read_doc(tmp.name);
+    } except Exception as e {
+        err = str(e);
+    }
+    os.unlink(tmp.name);
+    if err != "" {
+        return {"error": f"could not read {name}: {err}"};
+    }
+    if text.strip() == "" {
+        return {"error": f"no extractable text in {name} (scanned image PDF?)"};
+    }
+    return {"text": text, "chars": len(text)};
+}
+
+def api_docs() -> list {
+    return [{"title": d.title, "kind": d.kind, "canon": canon_of(d.doc_index),
+             "segments": len([d -->[?:Segment]])}
+            for d in all_documents()];
+}
+
+def viol_key(v: object) -> str {
+    return f"{v.subject}|{v.predicate}|{v.req_doc}|{v.req_seg}";
+}
+
+def api_amend(body: dict) -> dict {
+    target = body.get("target", "");
+    canon = "";
+    kind = body.get("kind", "");
+    for d in all_documents() {
+        if d.title == target {
+            canon = canon_of(d.doc_index);
+            if kind == "" {
+                kind = d.kind;
+            }
+        }
+    }
+    if canon == "" {
+        return {"error": f"no document titled '{target}' in canon"};
+    }
+    before = {};
+    for v in [root -->[?:Violation]] {
+        before[viol_key(v)] = v.status;
+    }
+
+    title = body.get("title", "").strip() or f"Amendment to {target}";
+    text = (f"# TITLE: {title}\n# KIND: {kind}\n# CANON: {canon}\n"
+            + body.get("text", ""));
+    w = Ingest(text=text, title_hint=title);
+    root spawn w;
+    root spawn Auditor(quiet=True);
+    data = write_graph("web/graph.json");
+
+    introduced = [];
+    withdrawn = [];
+    for v in data["violations"] {
+        was = before.get(v["key"], "");
+        if v["status"] in ["confirmed", "candidate"] and was != v["status"] {
+            introduced.append(v);
+        } elif v["status"] == "withdrawn" and was in ["confirmed", "candidate"] {
+            withdrawn.append(v);
+        }
+    }
+    return {"log": w.log, "violations": data["violations"],
+            "score": score_stats(), "title": title,
+            "consistent": len(introduced) == 0,
+            "introduced": introduced, "withdrawn": withdrawn};
 }
 
 def api_naive(body: dict) -> dict {
@@ -1158,6 +1376,9 @@ class ApiHandler(BaseHTTPRequestHandler) {
         } elif p == "/api/score" {
             self._send(200, "application/json",
                        json.dumps(score_stats()).encode());
+        } elif p == "/api/docs" {
+            self._send(200, "application/json",
+                       json.dumps(api_docs()).encode());
         } elif p == "/api/samples" {
             names = sorted(os.listdir("data"));
             self._send(200, "application/json", json.dumps(names).encode());
@@ -1184,6 +1405,10 @@ class ApiHandler(BaseHTTPRequestHandler) {
         try {
             if p == "/api/analyze" {
                 out = api_analyze(body);
+            } elif p == "/api/amend" {
+                out = api_amend(body);
+            } elif p == "/api/extract" {
+                out = api_extract(body);
             } elif p == "/api/naive" {
                 out = api_naive(body);
             } elif p == "/api/reset" {

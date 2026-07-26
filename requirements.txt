@@ -2,3 +2,4 @@
 # NOT the anaconda base environment.
 jaclang==0.16.7
 byllm==0.6.19
+pypdf==6.14.2

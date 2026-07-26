@@ -1,0 +1,23 @@
+# TITLE: Amendment No. 1
+# KIND: contract amendment
+# CANON: meridian_msa
+
+## SCENE 1
+AMENDMENT NO. 1, SECTION 1 — PAYMENT TERMS. Section 2 of the Agreement is
+amended such that Client shall pay all undisputed invoices on net
+forty-five (45) day terms from date of invoice. All references to net-thirty
+payment terms are superseded.
+@expect establishes payment_terms|value|net_45
+
+## SCENE 2
+AMENDMENT NO. 1, SECTION 2 — SERVICE CREDITS. The parties agree that the
+Service Credit Schedule attached to the Agreement as Exhibit B is hereby
+DELETED in its entirety and of no further force or effect. Service level
+failures shall instead be addressed through the quarterly business review.
+@expect establishes exhibit_b|status|deleted
+
+## SCENE 3
+AMENDMENT NO. 1, SECTION 3 — SUPPORT UPGRADE. Section 4 of the Agreement is
+amended to provide that Provider shall make technical support available
+twenty-four hours a day, seven days a week.
+@expect establishes support_hours|value|24_7

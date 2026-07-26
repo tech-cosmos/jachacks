@@ -1,0 +1,17 @@
+# TITLE: Amendment No. 3 (Corrective)
+# KIND: contract amendment
+# CANON: meridian_msa
+
+## SCENE 1
+AMENDMENT NO. 3, SECTION 1 — CORRECTION OF PAYMENT TERMS. The parties
+acknowledge a drafting error in Amendment No. 1. Effective retroactively to
+the effective date of Amendment No. 1 (nunc pro tunc), Client's payment
+terms are restored to net-thirty (30) days, and the net-thirty schedule
+referenced in Amendment No. 2 is confirmed as operative at all times.
+@expect establishes payment_terms|value|net_30
+
+## SCENE 2
+AMENDMENT NO. 3, SECTION 2 — REINSTATEMENT OF EXHIBIT B. The Service Credit
+Schedule attached as Exhibit B is hereby REINSTATED in its entirety,
+retroactively to the effective date of Amendment No. 1, as if never deleted.
+@expect establishes exhibit_b|status|in_force

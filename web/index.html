@@ -139,6 +139,45 @@
   }
   .minor:hover { color: var(--ink); border-color: var(--ink); }
 
+  /* form tabs */
+  .tabs { display: flex; gap: 6px; }
+  .tab {
+    flex: 1; font: 700 11px "Courier Prime", monospace; letter-spacing: .12em;
+    padding: 6px 0; cursor: pointer; border-radius: 2px 2px 0 0;
+    border: 1.5px solid var(--paper-line); border-bottom: none;
+    background: rgba(35,32,26,.06); color: var(--ink-dim);
+  }
+  .tab.on {
+    background: transparent; color: var(--ink);
+    border-color: var(--ink); border-bottom: 2px solid var(--paper);
+  }
+  .pane { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+
+  #amendgo {
+    flex: 1; font-family: "Fraunces", serif; font-weight: 800;
+    font-size: 15px; letter-spacing: .1em; color: var(--paper);
+    background: linear-gradient(180deg, #2f5e86, #1f4160);
+    border: 2px solid #1f4160; border-radius: 3px;
+    padding: 12px 0; cursor: pointer; box-shadow: 0 4px 0 #16314a;
+    transition: transform .08s, box-shadow .08s;
+  }
+  #amendgo:hover { filter: brightness(1.1); }
+  #amendgo:active, #amendgo.busy { transform: translateY(3px); box-shadow: 0 1px 0 #16314a; }
+  #amendgo:disabled { opacity: .55; cursor: wait; }
+
+  #amendverdict { display: none; text-align: center; padding: 4px 0 2px; }
+  #amendverdict .bigstamp {
+    display: inline-block; font-family: "Fraunces", serif; font-weight: 900;
+    font-size: 22px; letter-spacing: .18em; padding: 6px 22px 4px;
+    border: 3px solid; border-radius: 4px; transform: rotate(-4deg);
+    mix-blend-mode: multiply; animation: stamp .5s cubic-bezier(.2,1.6,.35,1) both;
+  }
+  #amendverdict .bigstamp.ok  { color: var(--green); border-color: var(--green); }
+  #amendverdict .bigstamp.bad { color: var(--red); border-color: var(--red); }
+  #amendverdict .sub2 {
+    margin-top: 7px; font-size: 10.5px; color: var(--ink-dim); letter-spacing: .06em;
+  }
+
   /* status / log ticker on the page */
   #status {
     min-height: 60px; max-height: 190px; overflow-y: auto;
@@ -292,12 +331,18 @@
 <main>
   <section id="deskpanel">
     <div id="page">
-      <div class="head"><b>SCRIPT&nbsp;IN</b><span>continuity dept. — form 8.5</span></div>
-      <div>
-        <label>PRODUCTION / EPISODE TITLE</label>
-        <input id="title" type="text" placeholder="e.g. Home Alone (1990) — Part 2" spellcheck="false">
+      <div class="head"><b>CONTINUITY&nbsp;DESK</b><span>continuity dept. — form 8.5</span></div>
+      <div class="tabs">
+        <button class="tab on" id="tab-script">SCRIPT IN</button>
+        <button class="tab" id="tab-amend">AMENDMENT DESK</button>
       </div>
-      <textarea id="script" spellcheck="false" placeholder="## SCENE 1
+
+      <div class="pane" id="pane-script">
+        <div>
+          <label>PRODUCTION / DOCUMENT TITLE</label>
+          <input id="title" type="text" placeholder="e.g. Home Alone (1990) — Part 2" spellcheck="false">
+        </div>
+        <textarea id="script" spellcheck="false" placeholder="## SCENE 1
 INT. LIGHTHOUSE - NIGHT. The keeper smashes the only lamp
 with a hammer. The great lens shatters; the light goes dark.
 
@@ -305,19 +350,51 @@ with a hammer. The great lens shatters; the light goes dark.
 That night a ship navigates safely into harbor, guided by
 the lighthouse beam sweeping across the bay.
 
-(paste scenes — same title appends new scenes to that canon)"></textarea>
-      <div class="filerow">
-        <button class="filebtn" onclick="document.getElementById('filein').click()">📎 ATTACH PAGES (.txt)</button>
-        <input id="filein" type="file" accept=".txt,.fountain,.md">
-        <select id="samples"><option value="">load reel…</option></select>
+(paste scenes — same title appends new scenes to that canon.
+works on contracts too: load the MSA reel below.)"></textarea>
+        <div class="filerow">
+          <button class="filebtn" onclick="document.getElementById('filein').click()">📎 ATTACH (.txt/.pdf/.docx)</button>
+          <input id="filein" type="file" accept=".txt,.fountain,.md,.pdf,.docx">
+          <select id="kind">
+            <option value="">screenplay</option>
+            <option value="contract">contract</option>
+          </select>
+          <select id="samples"><option value="">load reel…</option></select>
+        </div>
+        <div class="actions">
+          <button id="analyze">⬤&nbsp; ANALYZE</button>
+        </div>
+        <div class="actions">
+          <button class="minor" id="naive">ask a raw LLM instead (the control group)</button>
+          <button class="minor" id="reset" title="double-click to wipe canon">✕ reset canon</button>
+        </div>
       </div>
-      <div class="actions">
-        <button id="analyze">⬤&nbsp; ANALYZE</button>
+
+      <div class="pane" id="pane-amend" style="display:none">
+        <div>
+          <label>AMENDS DOCUMENT (SHARES ITS CANON)</label>
+          <select id="amendtarget" style="width:100%"><option value="">— ingest a base document first —</option></select>
+        </div>
+        <div>
+          <label>AMENDMENT TITLE</label>
+          <input id="amendtitle" type="text" placeholder="e.g. Amendment No. 2" spellcheck="false">
+        </div>
+        <textarea id="amendtext" spellcheck="false" placeholder="paste the amendment here (## SCENE n section headers optional)
+or attach a .pdf / .docx / .txt below.
+
+filing it immediately re-audits the whole canon:
+new contradictions are stamped CONFIRMED,
+healed ones are WITHDRAWN."></textarea>
+        <div class="filerow">
+          <button class="filebtn" onclick="document.getElementById('amendfile').click()">📎 ATTACH (.txt/.pdf/.docx)</button>
+          <input id="amendfile" type="file" accept=".txt,.md,.pdf,.docx" style="display:none">
+        </div>
+        <div class="actions">
+          <button id="amendgo">⚖&nbsp; FILE &amp; TEST CONSISTENCY</button>
+        </div>
+        <div id="amendverdict"></div>
       </div>
-      <div class="actions">
-        <button class="minor" id="naive">ask a raw LLM instead (the control group)</button>
-        <button class="minor" id="reset" title="double-click to wipe canon">✕ reset canon</button>
-      </div>
+
       <div id="status"><div class="lg" style="color:var(--ink-dim)">canon idle — paste pages or load a reel.</div></div>
     </div>
   </section>
@@ -477,13 +554,114 @@ function applyGraph(data, score) {
 }
 
 async function refresh(score) {
-  const r = await fetch('graph.json?t=' + Date.now());
-  if (!r.ok) return;
-  const t = await r.text();
-  if (t === lastGraph && !score) return;
-  lastGraph = t;
-  applyGraph(JSON.parse(t), score);
+  try {
+    const r = await fetch('graph.json?t=' + Date.now());
+    if (!r.ok) return;
+    const t = await r.text();
+    if (t === lastGraph && !score) return;
+    lastGraph = t;
+    applyGraph(JSON.parse(t), score);
+  } catch (e) {}   /* server busy walking — the 4s poll will catch up */
 }
+
+/* ---------- tabs + amendment desk ---------- */
+function showTab(which) {
+  const script = which === 'script';
+  $('pane-script').style.display = script ? 'flex' : 'none';
+  $('pane-amend').style.display = script ? 'none' : 'flex';
+  $('tab-script').classList.toggle('on', script);
+  $('tab-amend').classList.toggle('on', !script);
+  if (!script) loadDocs();
+}
+$('tab-script').onclick = () => showTab('script');
+$('tab-amend').onclick = () => showTab('amend');
+
+async function loadDocs() {
+  try {
+    const docs = await (await fetch('/api/docs')).json();
+    const sel = $('amendtarget'), had = sel.value;
+    sel.innerHTML = docs.length
+      ? docs.map(d => `<option value="${d.title}">${d.title} — ${d.kind}, ${d.segments} §</option>`).join('')
+      : '<option value="">— ingest a base document first —</option>';
+    if (had && [...sel.options].some(o => o.value === had)) sel.value = had;
+  } catch (e) {}
+}
+
+/* read an attached file: text files locally, pdf/docx via the jac server */
+function readUpload(file, cb) {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.pdf') || name.endsWith('.docx')) {
+    const rd = new FileReader();
+    rd.onload = async () => {
+      logLine(`extracting text from ${file.name} …`, 'walking');
+      try {
+        const r = await fetch('/api/extract', { method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: file.name,
+                                 b64: rd.result.split(',')[1] }) });
+        const out = await r.json();
+        if (out.error) { logLine('✕ ' + out.error, 'walking'); return; }
+        logLine(`— ${out.chars} chars extracted from ${file.name}.`);
+        cb(out.text);
+      } catch (e) { logLine('✕ extract failed: ' + e.message, 'walking'); }
+    };
+    rd.readAsDataURL(file);
+  } else {
+    const rd = new FileReader();
+    rd.onload = () => cb(rd.result);
+    rd.readAsText(file);
+  }
+}
+
+function amendVerdict(out) {
+  const box = $('amendverdict');
+  const ok = !!out.consistent;
+  const nI = (out.introduced || []).length, nW = (out.withdrawn || []).length;
+  const bits = [];
+  if (nI) bits.push(`${nI} new contradiction${nI > 1 ? 's' : ''} confirmed`);
+  if (nW) bits.push(`${nW} prior finding${nW > 1 ? 's' : ''} withdrawn`);
+  if (!bits.length) bits.push('no findings changed');
+  box.innerHTML = `<div class="bigstamp ${ok ? 'ok' : 'bad'}">${ok ? 'CONSISTENT' : 'INCONSISTENT'}</div>
+    <div class="sub2">${bits.join(' · ')} — details on the right</div>`;
+  box.style.display = 'block';
+}
+
+$('amendgo').onclick = async () => {
+  const target = $('amendtarget').value;
+  const text = $('amendtext').value.trim();
+  if (!target) { logLine('no target document — ingest a base document first.', 'walking'); return; }
+  if (!text) { logLine('the amendment is blank.', 'walking'); return; }
+  $('amendgo').disabled = true; $('amendgo').classList.add('busy');
+  $('amendverdict').style.display = 'none';
+  clearLog();
+  logLine(`filing amendment against "${target}" — extracting + re-auditing`, 'walking');
+  try {
+    const r = await fetch('/api/amend', { method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target, title: $('amendtitle').value.trim(), text }) });
+    const out = await r.json();
+    clearLog();
+    if (out.error) { logLine('✕ ' + out.error, 'walking'); }
+    else {
+      (out.log || []).forEach((l, i) =>
+        setTimeout(() => logLine(l), Math.min(i * 90, 2500)));
+      amendVerdict(out);
+      await refresh(out.score);
+      await loadDocs();
+    }
+  } catch (e) { logLine('✕ server unreachable: ' + e.message, 'walking'); }
+  $('amendgo').disabled = false; $('amendgo').classList.remove('busy');
+};
+
+$('amendfile').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  readUpload(f, text => {
+    $('amendtext').value = text;
+    if (!$('amendtitle').value)
+      $('amendtitle').value = f.name.replace(/\.\w+$/, '');
+  });
+};
 
 /* ---------- actions ---------- */
 $('analyze').onclick = async () => {
@@ -496,7 +674,7 @@ $('analyze').onclick = async () => {
     const r = await fetch('/api/analyze', { method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: $('title').value.trim() || 'Pasted Script',
-                             text }) });
+                             kind: $('kind').value, text }) });
     const out = await r.json();
     clearLog();
     if (out.error) { logLine('✕ ' + out.error, 'walking'); }
@@ -506,6 +684,7 @@ $('analyze').onclick = async () => {
       setTimeout(() => logLine('— audit complete. verdicts on the right.'),
         Math.min((out.log || []).length * 90, 2600));
       await refresh(out.score);
+      await loadDocs();
     }
   } catch (e) { logLine('✕ server unreachable: ' + e.message, 'walking'); }
   $('analyze').disabled = false; $('analyze').classList.remove('busy');
@@ -536,7 +715,9 @@ $('reset').onclick = async () => {
   }
   await fetch('/api/reset', { method: 'POST' });
   prevStatus = {}; clearLog(); logLine('canon wiped. blank slate.');
+  $('amendverdict').style.display = 'none';
   await refresh();
+  await loadDocs();
 };
 
 /* samples + file */
@@ -560,16 +741,17 @@ $('samples').onchange = async e => {
 $('filein').onchange = e => {
   const f = e.target.files[0];
   if (!f) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    $('script').value = rd.result;
-    const m = rd.result.match(/^# TITLE:\s*(.+)$/m);
+  readUpload(f, text => {
+    $('script').value = text;
+    const m = text.match(/^# TITLE:\s*(.+)$/m);
     $('title').value = m ? m[1].trim() : f.name.replace(/\.\w+$/, '');
-  };
-  rd.readAsText(f);
+    const k = text.match(/^# KIND:\s*(.+)$/m);
+    if (k && /contract|agreement|amendment|legal/i.test(k[1])) $('kind').value = 'contract';
+  });
 };
 
 refresh();
+loadDocs();
 setInterval(() => refresh(), 4000);
 fetch('/api/score').then(r => r.json()).then(s => tally(lastVs, s)).catch(() => {});
 </script>
