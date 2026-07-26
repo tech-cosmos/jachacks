@@ -63,9 +63,18 @@ jac run main.jac naive data/home_alone_ep1.txt data/home_alone_ep2.txt
 cloning:
 
 ```sh
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt           # pinned: jaclang 0.16.7 + byllm 0.6.19
 jac run main.jac import canon_share.json   # full canon, zero LLM calls, no keys
 jac run main.jac serve                     # → http://localhost:8765
 ```
+
+Use a fresh Python 3.12 venv — NOT anaconda's base env, whose unpinned
+newest jaclang has a different module layout and (on macOS) can die with
+`PermissionError` while searching parent folders for a project root. If you
+must use conda: `conda create -n jac python=3.12`, activate it, then the pip
+install above. Also clone somewhere like `~/dev`, not Desktop/Documents
+(macOS folder protection triggers that PermissionError).
 
 Re-exporting after new ingests: `jac run main.jac export canon_share.json`
 (add `prose` as a third arg to include scene text — don't commit that for

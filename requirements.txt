@@ -1,0 +1,4 @@
+# Tested stack — JacHacks SF 2026. Use Python 3.12 in a fresh venv,
+# NOT the anaconda base environment.
+jaclang==0.16.7
+byllm==0.6.19
