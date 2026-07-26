@@ -5,3 +5,5 @@ __pycache__/
 .env
 .context/
 .DS_Store
+.playwright-mcp/
+viz-check.png
