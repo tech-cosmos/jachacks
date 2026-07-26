@@ -1,0 +1,40 @@
+# TITLE: Meridian MSA (2026)
+# KIND: contract
+# CANON: meridian_msa
+# VOCAB: payment_terms, exhibit_b, early_payment_discount, support_hours
+
+## SCENE 1
+SECTION 1 — TERM AND GOVERNING LAW. This Master Services Agreement is entered
+into by Meridian Analytics, Inc. ("Provider") and Halcyon Retail Group, LLC
+("Client"). The initial term of this Agreement is twenty-four (24) months
+from the Effective Date. This Agreement is governed by the laws of the State
+of Delaware.
+@expect establishes agreement_term|value|24_months
+@expect establishes governing_law|value|delaware
+
+## SCENE 2
+SECTION 2 — FEES AND PAYMENT. Client shall pay all undisputed invoices on
+net-thirty (30) day terms from date of invoice. Client is entitled to an
+early-payment discount of two percent (2%) on any invoice paid within ten
+(10) days, per the schedule "2/10 net 30."
+@expect establishes payment_terms|value|net_30
+@expect establishes early_payment_discount|status|in_force
+
+## SCENE 3
+SECTION 3 — SERVICE LEVELS. Provider guarantees 99.9% monthly uptime for the
+hosted platform. Service credits for missed service levels shall be
+calculated and applied strictly per the Service Credit Schedule attached as
+Exhibit B, which is incorporated into this Agreement.
+@expect establishes uptime_sla|value|99_9
+@expect establishes exhibit_b|status|in_force
+
+## SCENE 4
+SECTION 4 — SUPPORT. Provider shall make technical support available during
+business hours, 9:00 to 18:00 Pacific, Monday through Friday, excluding
+Provider holidays.
+@expect establishes support_hours|value|business_hours
+
+## SCENE 5
+SECTION 5 — TERMINATION. Either party may terminate this Agreement for
+convenience on sixty (60) days prior written notice to the other party.
+@expect establishes termination_notice|value|60_days

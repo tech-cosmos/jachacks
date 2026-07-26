@@ -1,6 +1,7 @@
 # Continuity Walker
 
-**Finds provable plot holes in movie and TV scripts.** Built in
+**Finds provable plot holes in movie and TV scripts — and drafting
+inconsistencies in contracts and their amendments.** Built in
 [Jac](https://github.com/jaseci-labs/jac) at JacHacks SF 2026.
 
 ## The idea
@@ -80,7 +81,49 @@ Re-exporting after new ingests: `jac run main.jac export canon_share.json`
 (add `prose` as a third arg to include scene text — don't commit that for
 copyrighted transcripts). You only need API keys to ingest *new* scenes.
 
-**Real documents:** `.docx` transcripts ingest directly — `Scene N:` headings
+## Not just movies: contracts
+
+![Amendment Desk](web/amendment-desk.png)
+
+The engine is domain-agnostic — anything that's a sequence of text where
+facts get established and later relied on. `# KIND: contract` switches to
+contract-tuned extraction/adjudication prompts (the screenplay prompts are
+untouched): sections *establish* terms (payment_terms = net_30, exhibit_b =
+in_force) and *require* the terms they reference. An amendment that relies
+on a clause a prior amendment deleted is a provable drafting error — with
+the chain of instruments as the proof.
+
+```sh
+./demo.sh contracts        # MSA + Amendments 1-2 → 2 CONFIRMED inconsistencies
+./demo.sh contracts-amend  # corrective Amendment 3 → findings WITHDRAWN
+```
+
+In the UI, the **AMENDMENT DESK** tab does this live: pick the document it
+amends, paste (or attach) the amendment, hit FILE & TEST CONSISTENCY — the
+whole canon re-audits immediately and you get a CONSISTENT / INCONSISTENT
+stamp with the newly confirmed and newly withdrawn findings. It works on
+story canons too — file a what-if scene against a movie and see what it
+breaks. **Retract a filing** (same tab) deletes any document again and
+re-audits, so experiments are fully reversible; verdicts that the filing
+had changed flip back. The pre-built
+corpus is `data/contract_*.txt`; a fully adjudicated snapshot ships as
+`canon_contracts.json`.
+
+Movies and contracts coexist in one canon: `import` **merges** (snapshots
+remap around existing documents, duplicate titles are skipped), so
+
+```sh
+jac run main.jac import canon_share.json       # the movie corpus
+jac run main.jac import canon_contracts.json   # + the contract corpus
+```
+
+loads both with zero LLM calls and no reset. `# CANON:` scopes keep the
+audits isolated, and the **canon lens** dropdown on the graph filters the
+view to one story world / contract at a time — switching is instant and
+purely client-side.
+
+**Real documents:** `.docx` and `.pdf` files ingest directly (`pip install
+pypdf` for PDFs; scanned image-only PDFs won't work) — `Scene N:` headings
 are recognized, headingless transcripts are auto-chunked, and
 `jac run main.jac convert <src.docx> <out.txt> "<Title>"` writes a reusable
 reel. Films that share a story world declare `# CANON: <scope>` so episodes

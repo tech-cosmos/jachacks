@@ -1,0 +1,25 @@
+# TITLE: Amendment No. 2
+# KIND: contract amendment
+# CANON: meridian_msa
+
+## SCENE 1
+AMENDMENT NO. 2, SECTION 1 — VOLUME PRICING. In consideration of Client's
+expanded usage commitment, platform fees are reduced by eight percent (8%)
+for the remainder of the term.
+@expect establishes platform_fees|value|reduced_8pct
+
+## SCENE 2
+AMENDMENT NO. 2, SECTION 2 — EARLY-PAYMENT INCENTIVE. Client shall continue
+to be entitled to the early-payment discount set forth in Section 2 of the
+Agreement, calculated against the net-thirty (30) day payment schedule
+thereunder, and such discount is increased to three percent (3%).
+@expect requires payment_terms|value|net_30
+@expect establishes early_payment_discount|value|3_percent
+
+## SCENE 3
+AMENDMENT NO. 2, SECTION 3 — ENHANCED SERVICE CREDITS. Service credits
+payable for missed service levels shall be DOUBLED. The doubled credits
+shall be calculated and applied per the Service Credit Schedule set forth in
+Exhibit B of the Agreement.
+@expect requires exhibit_b|status|in_force
+@expect establishes service_credits|value|doubled

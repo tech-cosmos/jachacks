@@ -1,0 +1,267 @@
+{
+ "documents": [
+  {
+   "title": "Meridian MSA (2026)",
+   "kind": "contract",
+   "doc_index": 0,
+   "canon": "meridian_msa",
+   "segments": [
+    {
+     "order": 1.0,
+     "prose": "SECTION 1 \u2014 TERM AND GOVERNING LAW. This Master Services Agreement is entered\ninto by Meridian Analytics, Inc. (\"Provider\") and Halcyon Retail Group, LLC\n(\"Client\"). The initial term of this Agreement is twenty-four (24) months\nfrom the Effective Date. This Agreement is governed by the laws of the State\nof Delaware.",
+     "exp_total": 2,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "initial_term",
+       "predicate": "duration",
+       "value": "24_months"
+      },
+      {
+       "subject": "governing_law",
+       "predicate": "value",
+       "value": "delaware"
+      }
+     ],
+     "requires": [
+      {
+       "subject": "effective_date",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ]
+    },
+    {
+     "order": 2.0,
+     "prose": "SECTION 2 \u2014 FEES AND PAYMENT. Client shall pay all undisputed invoices on\nnet-thirty (30) day terms from date of invoice. Client is entitled to an\nearly-payment discount of two percent (2%) on any invoice paid within ten\n(10) days, per the schedule \"2/10 net 30.\"",
+     "exp_total": 2,
+     "exp_matched": 2,
+     "establishes": [
+      {
+       "subject": "payment_terms",
+       "predicate": "value",
+       "value": "net_30"
+      },
+      {
+       "subject": "early_payment_discount",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ],
+     "requires": []
+    },
+    {
+     "order": 3.0,
+     "prose": "SECTION 3 \u2014 SERVICE LEVELS. Provider guarantees 99.9% monthly uptime for the\nhosted platform. Service credits for missed service levels shall be\ncalculated and applied strictly per the Service Credit Schedule attached as\nExhibit B, which is incorporated into this Agreement.",
+     "exp_total": 2,
+     "exp_matched": 2,
+     "establishes": [
+      {
+       "subject": "exhibit_b",
+       "predicate": "status",
+       "value": "in_force"
+      },
+      {
+       "subject": "uptime_guarantee",
+       "predicate": "value",
+       "value": "99_9_percent"
+      }
+     ],
+     "requires": []
+    },
+    {
+     "order": 4.0,
+     "prose": "SECTION 4 \u2014 SUPPORT. Provider shall make technical support available during\nbusiness hours, 9:00 to 18:00 Pacific, Monday through Friday, excluding\nProvider holidays.",
+     "exp_total": 1,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "support_hours",
+       "predicate": "value",
+       "value": "business_hours"
+      },
+      {
+       "subject": "support_hours",
+       "predicate": "location",
+       "value": "pacific"
+      }
+     ],
+     "requires": []
+    },
+    {
+     "order": 5.0,
+     "prose": "SECTION 5 \u2014 TERMINATION. Either party may terminate this Agreement for\nconvenience on sixty (60) days prior written notice to the other party.",
+     "exp_total": 1,
+     "exp_matched": 0,
+     "establishes": [
+      {
+       "subject": "termination_notice",
+       "predicate": "duration",
+       "value": "60_days"
+      }
+     ],
+     "requires": []
+    }
+   ]
+  },
+  {
+   "title": "Amendment No. 1",
+   "kind": "contract amendment",
+   "doc_index": 1,
+   "canon": "meridian_msa",
+   "segments": [
+    {
+     "order": 1.0,
+     "prose": "AMENDMENT NO. 1, SECTION 1 \u2014 PAYMENT TERMS. Section 2 of the Agreement is\namended such that Client shall pay all undisputed invoices on net\nforty-five (45) day terms from date of invoice. All references to net-thirty\npayment terms are superseded.",
+     "exp_total": 1,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "payment_terms",
+       "predicate": "value",
+       "value": "net_45"
+      }
+     ],
+     "requires": [
+      {
+       "subject": "payment_terms",
+       "predicate": "value",
+       "value": "net_30"
+      }
+     ]
+    },
+    {
+     "order": 2.0,
+     "prose": "AMENDMENT NO. 1, SECTION 2 \u2014 SERVICE CREDITS. The parties agree that the\nService Credit Schedule attached to the Agreement as Exhibit B is hereby\nDELETED in its entirety and of no further force or effect. Service level\nfailures shall instead be addressed through the quarterly business review.",
+     "exp_total": 1,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "exhibit_b",
+       "predicate": "status",
+       "value": "deleted"
+      }
+     ],
+     "requires": []
+    },
+    {
+     "order": 3.0,
+     "prose": "AMENDMENT NO. 1, SECTION 3 \u2014 SUPPORT UPGRADE. Section 4 of the Agreement is\namended to provide that Provider shall make technical support available\ntwenty-four hours a day, seven days a week.",
+     "exp_total": 1,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "support_hours",
+       "predicate": "value",
+       "value": "24_7"
+      }
+     ],
+     "requires": []
+    }
+   ]
+  },
+  {
+   "title": "Amendment No. 2",
+   "kind": "contract amendment",
+   "doc_index": 2,
+   "canon": "meridian_msa",
+   "segments": [
+    {
+     "order": 1.0,
+     "prose": "AMENDMENT NO. 2, SECTION 1 \u2014 VOLUME PRICING. In consideration of Client's\nexpanded usage commitment, platform fees are reduced by eight percent (8%)\nfor the remainder of the term.",
+     "exp_total": 1,
+     "exp_matched": 0,
+     "establishes": [
+      {
+       "subject": "platform_fees",
+       "predicate": "value",
+       "value": "reduced_by_eight_percent"
+      },
+      {
+       "subject": "volume_pricing",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ],
+     "requires": []
+    },
+    {
+     "order": 2.0,
+     "prose": "AMENDMENT NO. 2, SECTION 2 \u2014 EARLY-PAYMENT INCENTIVE. Client shall continue\nto be entitled to the early-payment discount set forth in Section 2 of the\nAgreement, calculated against the net-thirty (30) day payment schedule\nthereunder, and such discount is increased to three percent (3%).",
+     "exp_total": 2,
+     "exp_matched": 1,
+     "establishes": [
+      {
+       "subject": "early_payment_discount",
+       "predicate": "value",
+       "value": "three_percent"
+      }
+     ],
+     "requires": [
+      {
+       "subject": "payment_terms",
+       "predicate": "value",
+       "value": "net_30"
+      },
+      {
+       "subject": "early_payment_discount",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ]
+    },
+    {
+     "order": 3.0,
+     "prose": "AMENDMENT NO. 2, SECTION 3 \u2014 ENHANCED SERVICE CREDITS. Service credits\npayable for missed service levels shall be DOUBLED. The doubled credits\nshall be calculated and applied per the Service Credit Schedule set forth in\nExhibit B of the Agreement.",
+     "exp_total": 2,
+     "exp_matched": 2,
+     "establishes": [
+      {
+       "subject": "service_credits",
+       "predicate": "value",
+       "value": "doubled"
+      },
+      {
+       "subject": "service_credit_schedule",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ],
+     "requires": [
+      {
+       "subject": "exhibit_b",
+       "predicate": "status",
+       "value": "in_force"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "violations": [
+  {
+   "subject": "payment_terms",
+   "predicate": "value",
+   "required_value": "net_30",
+   "found_value": "net_45",
+   "req_doc": 2,
+   "req_seg": 2.0,
+   "timeline": "  [Meridian MSA (2026) \u2014 scene 2] payment_terms value = net_30\n  [Amendment No. 1 \u2014 scene 1] payment_terms value = net_45",
+   "status": "confirmed",
+   "confidence": "high",
+   "reasoning": "The canon timeline shows payment_terms was changed from net_30 (MSA) to net_45 by Amendment No. 1, and this is the last state-changing fact before Amendment No. 2. Amendment No. 2, Section 2 explicitly calculates the early-payment discount 'against the net-thirty (30) day payment schedule thereunder,' which presupposes payment_terms = net_30. Nothing in the timeline shows a written instrument restoring net_30 before or within Amendment No. 2 \u2014 the section merely assumes the net-30 schedule rather than re-enacting it. Since a contract term changes only by written instrument, and no such instrument in the timeline restores net_30, the latest operative state (net_45) contradicts the requirement relied upon by Amendment No. 2 Section 2. This is not a wording discrepancy (net_45 vs net_30 are substantively different payment terms), so it constitutes a genuine drafting inconsistency."
+  },
+  {
+   "subject": "exhibit_b",
+   "predicate": "status",
+   "required_value": "in_force",
+   "found_value": "deleted",
+   "req_doc": 2,
+   "req_seg": 3.0,
+   "timeline": "  [Meridian MSA (2026) \u2014 scene 3] exhibit_b status = in_force\n  [Amendment No. 1 \u2014 scene 2] exhibit_b status = deleted",
+   "status": "confirmed",
+   "confidence": "high",
+   "reasoning": "The canon timeline shows Exhibit B was originally in_force under the Meridian MSA (2026), but Amendment No. 1 explicitly deleted Exhibit B. No subsequent instrument in the timeline restores or re-enacts Exhibit B. Amendment No. 2, Section 3 requires Exhibit B to be in_force because it relies on the Service Credit Schedule set forth in Exhibit B to calculate doubled service credits. Since the latest state in the timeline is 'deleted' and nothing written restores it, the requirement cannot be satisfied, constituting a genuine drafting inconsistency rather than a wording mismatch or unaddressed carve-out."
+  }
+ ]
+}
