@@ -152,6 +152,10 @@
     border-color: var(--ink); border-bottom: 2px solid var(--paper);
   }
   .pane { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .pane.dropping textarea {
+    border: 1.5px dashed var(--red); background: rgba(194,47,36,.07);
+  }
+  .pane.dropping .filebtn { border-color: var(--red); color: var(--red); }
 
   #amendgo {
     flex: 1; font-family: "Fraunces", serif; font-weight: 800;
@@ -357,8 +361,8 @@ with a hammer. The great lens shatters; the light goes dark.
 That night a ship navigates safely into harbor, guided by
 the lighthouse beam sweeping across the bay.
 
-(paste scenes — same title appends new scenes to that canon.
-works on contracts too: load the MSA reel below.)"></textarea>
+(paste scenes — or drag &amp; drop a .txt/.pdf/.docx anywhere on this form.
+same title appends new scenes to that canon. works on contracts too.)"></textarea>
         <div class="filerow">
           <button class="filebtn" onclick="document.getElementById('filein').click()">📎 ATTACH (.txt/.pdf/.docx)</button>
           <input id="filein" type="file" accept=".txt,.fountain,.md,.pdf,.docx">
@@ -386,8 +390,8 @@ works on contracts too: load the MSA reel below.)"></textarea>
           <label>AMENDMENT TITLE</label>
           <input id="amendtitle" type="text" placeholder="e.g. Amendment No. 2" spellcheck="false">
         </div>
-        <textarea id="amendtext" spellcheck="false" placeholder="paste the amendment here (## SCENE n section headers optional)
-or attach a .pdf / .docx / .txt below.
+        <textarea id="amendtext" spellcheck="false" placeholder="paste the amendment here — or drag &amp; drop a
+.txt / .pdf / .docx anywhere on this form.
 
 filing it immediately re-audits the whole canon:
 new contradictions are stamped CONFIRMED,
@@ -752,15 +756,36 @@ $('amendgo').onclick = async () => {
   $('amendgo').disabled = false; $('amendgo').classList.remove('busy');
 };
 
-$('amendfile').onchange = e => {
-  const f = e.target.files[0];
-  if (!f) return;
+function loadAmendFile(f) {
   readUpload(f, text => {
     $('amendtext').value = text;
     if (!$('amendtitle').value)
       $('amendtitle').value = f.name.replace(/\.\w+$/, '');
   });
+}
+$('amendfile').onchange = e => {
+  if (e.target.files[0]) loadAmendFile(e.target.files[0]);
 };
+
+/* ---------- drag & drop onto either pane ---------- */
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => e.preventDefault());
+function wireDrop(zoneId, handler) {
+  const z = $(zoneId);
+  ['dragenter', 'dragover'].forEach(ev => z.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); z.classList.add('dropping');
+  }));
+  ['dragleave', 'drop'].forEach(ev => z.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); z.classList.remove('dropping');
+  }));
+  z.addEventListener('drop', e => {
+    const fs = [...(e.dataTransfer?.files || [])];
+    if (fs.length > 1) logLine(`dropped ${fs.length} files — taking ${fs[0].name}`);
+    if (fs[0]) handler(fs[0]);
+  });
+}
+wireDrop('pane-script', f => loadScriptFile(f));
+wireDrop('pane-amend', f => loadAmendFile(f));
 
 /* ---------- actions ---------- */
 $('analyze').onclick = async () => {
@@ -837,9 +862,7 @@ $('samples').onchange = async e => {
   const m = t.match(/^# TITLE:\s*(.+)$/m);
   if (m) $('title').value = m[1].trim();
 };
-$('filein').onchange = e => {
-  const f = e.target.files[0];
-  if (!f) return;
+function loadScriptFile(f) {
   readUpload(f, text => {
     $('script').value = text;
     const m = text.match(/^# TITLE:\s*(.+)$/m);
@@ -847,6 +870,9 @@ $('filein').onchange = e => {
     const k = text.match(/^# KIND:\s*(.+)$/m);
     if (k && /contract|agreement|amendment|legal/i.test(k[1])) $('kind').value = 'contract';
   });
+}
+$('filein').onchange = e => {
+  if (e.target.files[0]) loadScriptFile(e.target.files[0]);
 };
 
 refresh();
