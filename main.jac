@@ -171,7 +171,11 @@ Rules:
 - Return 2-6 establishes and 0-3 requires; only the load-bearing ones.
 """
 def extract_facts_contract(section: str, known_subjects: list[str],
-                           known_predicates: list[str]) -> SceneFacts by llm();
+                           known_predicates: list[str]) -> SceneFacts by judge_llm();
+# contracts use the judge model for extraction too: the establish-vs-require
+# distinction ("continues to be entitled" must NOT re-enact the term) needs
+# stronger instruction-following than the bulk movie-corpus model, and
+# contract docs are a handful of sections, so the cost stays in pennies
 
 """You are adjudicating a candidate inconsistency in a contract and its chain
 of amendments. The canon timeline lists, in execution order, every state the
@@ -722,8 +726,16 @@ walker Ingest {
             }
         }
         if doc is None {
+            # max+1, never len(): after a drop/retract, len() would reuse a
+            # live doc_index and cross-wire canon scopes and skey ordering
+            next_index = 0;
+            for d in docs {
+                if d.doc_index >= next_index {
+                    next_index = d.doc_index + 1;
+                }
+            }
             doc = Document(title=script.title, kind=script.kind,
-                           doc_index=len(docs), canon=script.canon);
+                           doc_index=next_index, canon=script.canon);
             here ++> doc;
             note(self, f"+ document [{doc.doc_index}] {doc.title}");
         } else {
