@@ -628,6 +628,13 @@ def parse_script_text(text: str, fallback_title: str) -> ScriptData {
 
     # normalize "Scene 12: Title" style headings into ## SCENE markers
     text = re.sub("(?mi)^\\s*scene\\s+(\\d+)\\s*[:.].*$", "## SCENE \\1", text);
+    # contracts: segment on "SECTION 2 — ..." / "ARTICLE 2: ..." headings
+    # (all-caps + separator so prose references like "Section 4 of the
+    # Agreement" never match); keeps the heading line in the section prose
+    if is_contract(kind) and "## SCENE" not in text {
+        text = re.sub("(?m)^\\s*((?:SECTION|ARTICLE)\\s+(\\d+)\\s*[—:.\\-–].*)$",
+                      "## SCENE \\2\n\\1", text);
+    }
     scenes = [];
     chunks = text.split("## SCENE");
     counter = 0.0;

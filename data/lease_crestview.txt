@@ -1,0 +1,35 @@
+# TITLE: Crestview Commons Office Lease
+# KIND: contract
+# CANON: crestview_lease
+
+OFFICE LEASE AGREEMENT
+
+This Office Lease Agreement (the "Lease") is entered into as of March 1,
+2026, by and between CRESTVIEW COMMONS LP, a Delaware limited partnership
+("Landlord"), and NORTHWIND ROBOTICS, INC., a California corporation
+("Tenant").
+
+SECTION 1 — PREMISES AND TERM. Landlord leases to Tenant Suite 400 of the
+building located at 2200 Crestview Parkway, San Jose, California (the
+"Premises"), comprising approximately 6,200 rentable square feet. The term
+of this Lease is sixty (60) months, commencing April 1, 2026.
+
+SECTION 2 — BASE RENT. Tenant shall pay base rent of eight thousand four
+hundred dollars ($8,400) per month, due on the first day of each calendar
+month.
+
+SECTION 3 — PARKING. Landlord grants Tenant a parking license for ten (10)
+reserved parking spaces in Garage B, marked with Tenant's name, at no
+additional charge for the duration of the term.
+
+SECTION 4 — SECURITY DEPOSIT. Tenant shall deposit with Landlord the sum of
+twenty-five thousand dollars ($25,000) as a security deposit, to be held for
+the duration of the term.
+
+SECTION 5 — SIGNAGE. Tenant is granted the exclusive right to install and
+maintain one illuminated rooftop sign bearing Tenant's logo, subject to
+municipal approval.
+
+SECTION 6 — SUBLETTING. Tenant shall not sublet the Premises or any part
+thereof without Landlord's prior written consent, which shall not be
+unreasonably withheld.
