@@ -109,6 +109,10 @@
   }
   textarea:focus { border-color: var(--ink); }
   .filerow { display: flex; gap: 8px; align-items: center; }
+  /* selects may shrink below their widest option (long titles ellipsize
+     natively); buttons keep their natural size and never get pushed out */
+  .filerow select { min-width: 0; flex: 1 1 auto; }
+  .filerow .filebtn, .filerow .minor { flex: 0 0 auto; white-space: nowrap; }
   .filebtn, select {
     font: 11px "Courier Prime", monospace; letter-spacing: .06em;
     border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
@@ -364,9 +368,9 @@ the lighthouse beam sweeping across the bay.
 (paste scenes — or drag &amp; drop a .txt/.pdf/.docx anywhere on this form.
 same title appends new scenes to that canon. works on contracts too.)"></textarea>
         <div class="filerow">
-          <button class="filebtn" onclick="document.getElementById('filein').click()">📎 ATTACH (.txt/.pdf/.docx)</button>
+          <button class="filebtn" title=".txt / .pdf / .docx — or drag & drop" onclick="document.getElementById('filein').click()">📎 ATTACH</button>
           <input id="filein" type="file" accept=".txt,.fountain,.md,.pdf,.docx">
-          <select id="kind">
+          <select id="kind" style="flex:0 0 auto">
             <option value="">screenplay</option>
             <option value="contract">contract</option>
           </select>
@@ -397,7 +401,7 @@ filing it immediately re-audits the whole canon:
 new contradictions are stamped CONFIRMED,
 healed ones are WITHDRAWN."></textarea>
         <div class="filerow">
-          <button class="filebtn" onclick="document.getElementById('amendfile').click()">📎 ATTACH (.txt/.pdf/.docx)</button>
+          <button class="filebtn" title=".txt / .pdf / .docx — or drag & drop" onclick="document.getElementById('amendfile').click()">📎 ATTACH</button>
           <input id="amendfile" type="file" accept=".txt,.md,.pdf,.docx" style="display:none">
         </div>
         <div class="actions">
